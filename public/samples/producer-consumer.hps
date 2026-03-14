@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "type": "hpsim",
+  "net": {
+    "name": "Producer-Consumer",
+    "description": "Producer fills a bounded buffer (capacity 3), consumer empties it. Buffer Slots control concurrency.",
+    "places": {
+      "p1": { "id": "p1", "type": "place", "label": "To Produce", "position": { "x": 100, "y": 200 }, "tokens": 5, "capacity": 0 },
+      "p2": { "id": "p2", "type": "place", "label": "Buffer", "position": { "x": 300, "y": 200 }, "tokens": 0, "capacity": 3 },
+      "p3": { "id": "p3", "type": "place", "label": "Consumed", "position": { "x": 500, "y": 200 }, "tokens": 0, "capacity": 0 },
+      "p4": { "id": "p4", "type": "place", "label": "Buffer Slots", "position": { "x": 300, "y": 400 }, "tokens": 3, "capacity": 0 }
+    },
+    "transitions": {
+      "t1": { "id": "t1", "type": "transition", "label": "Produce", "position": { "x": 200, "y": 200 }, "delay": 0, "priority": 0 },
+      "t2": { "id": "t2", "type": "transition", "label": "Consume", "position": { "x": 400, "y": 200 }, "delay": 0, "priority": 0 }
+    },
+    "arcs": {
+      "a1": { "id": "a1", "type": "arc", "arcType": "normal", "sourceId": "p1", "targetId": "t1", "weight": 1, "bendPoints": [] },
+      "a2": { "id": "a2", "type": "arc", "arcType": "normal", "sourceId": "t1", "targetId": "p2", "weight": 1, "bendPoints": [] },
+      "a3": { "id": "a3", "type": "arc", "arcType": "normal", "sourceId": "p2", "targetId": "t2", "weight": 1, "bendPoints": [] },
+      "a4": { "id": "a4", "type": "arc", "arcType": "normal", "sourceId": "t2", "targetId": "p3", "weight": 1, "bendPoints": [] },
+      "a5": { "id": "a5", "type": "arc", "arcType": "normal", "sourceId": "p4", "targetId": "t1", "weight": 1, "bendPoints": [] },
+      "a6": { "id": "a6", "type": "arc", "arcType": "normal", "sourceId": "t2", "targetId": "p4", "weight": 1, "bendPoints": [] }
+    },
+    "annotations": {}
+  }
+}

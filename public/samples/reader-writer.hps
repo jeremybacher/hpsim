@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "type": "hpsim",
+  "net": {
+    "name": "Reader-Writer",
+    "description": "Multiple readers can read concurrently (up to 3 slots), but a writer needs exclusive access (all 3 slots).",
+    "places": {
+      "p1": { "id": "p1", "type": "place", "label": "Readers Waiting", "position": { "x": 100, "y": 150 }, "tokens": 3, "capacity": 0 },
+      "p2": { "id": "p2", "type": "place", "label": "Slots", "position": { "x": 300, "y": 300 }, "tokens": 3, "capacity": 0 },
+      "p3": { "id": "p3", "type": "place", "label": "Reading", "position": { "x": 500, "y": 150 }, "tokens": 0, "capacity": 0 },
+      "p4": { "id": "p4", "type": "place", "label": "Writers Waiting", "position": { "x": 100, "y": 450 }, "tokens": 2, "capacity": 0 },
+      "p5": { "id": "p5", "type": "place", "label": "Writing", "position": { "x": 500, "y": 450 }, "tokens": 0, "capacity": 0 }
+    },
+    "transitions": {
+      "t1": { "id": "t1", "type": "transition", "label": "Start Read", "position": { "x": 300, "y": 150 }, "delay": 0, "priority": 0 },
+      "t2": { "id": "t2", "type": "transition", "label": "End Read", "position": { "x": 500, "y": 300 }, "delay": 0, "priority": 0 },
+      "t3": { "id": "t3", "type": "transition", "label": "Start Write", "position": { "x": 300, "y": 450 }, "delay": 0, "priority": 2 },
+      "t4": { "id": "t4", "type": "transition", "label": "End Write", "position": { "x": 500, "y": 550 }, "delay": 0, "priority": 0 }
+    },
+    "arcs": {
+      "a1":  { "id": "a1",  "type": "arc", "arcType": "normal", "sourceId": "p1", "targetId": "t1", "weight": 1, "bendPoints": [] },
+      "a2":  { "id": "a2",  "type": "arc", "arcType": "normal", "sourceId": "p2", "targetId": "t1", "weight": 1, "bendPoints": [] },
+      "a3":  { "id": "a3",  "type": "arc", "arcType": "normal", "sourceId": "t1", "targetId": "p3", "weight": 1, "bendPoints": [] },
+      "a4":  { "id": "a4",  "type": "arc", "arcType": "normal", "sourceId": "p3", "targetId": "t2", "weight": 1, "bendPoints": [] },
+      "a5":  { "id": "a5",  "type": "arc", "arcType": "normal", "sourceId": "t2", "targetId": "p2", "weight": 1, "bendPoints": [] },
+      "a6":  { "id": "a6",  "type": "arc", "arcType": "normal", "sourceId": "t2", "targetId": "p1", "weight": 1, "bendPoints": [] },
+      "a7":  { "id": "a7",  "type": "arc", "arcType": "normal", "sourceId": "p4", "targetId": "t3", "weight": 1, "bendPoints": [] },
+      "a8":  { "id": "a8",  "type": "arc", "arcType": "normal", "sourceId": "p2", "targetId": "t3", "weight": 3, "bendPoints": [] },
+      "a9":  { "id": "a9",  "type": "arc", "arcType": "normal", "sourceId": "t3", "targetId": "p5", "weight": 1, "bendPoints": [] },
+      "a10": { "id": "a10", "type": "arc", "arcType": "normal", "sourceId": "p5", "targetId": "t4", "weight": 1, "bendPoints": [] },
+      "a11": { "id": "a11", "type": "arc", "arcType": "normal", "sourceId": "t4", "targetId": "p2", "weight": 3, "bendPoints": [] },
+      "a12": { "id": "a12", "type": "arc", "arcType": "normal", "sourceId": "t4", "targetId": "p4", "weight": 1, "bendPoints": [] }
+    },
+    "annotations": {}
+  }
+}

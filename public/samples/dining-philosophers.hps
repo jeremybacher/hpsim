@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "type": "hpsim",
+  "net": {
+    "name": "Dining Philosophers (3)",
+    "description": "Three philosophers sharing forks. Each thinks, takes two forks, eats, then releases forks. Demonstrates potential deadlock.",
+    "places": {
+      "p1": { "id": "p1", "type": "place", "label": "Phil 1 Think", "position": { "x": 150, "y": 100 }, "tokens": 1, "capacity": 0 },
+      "p2": { "id": "p2", "type": "place", "label": "Phil 2 Think", "position": { "x": 450, "y": 100 }, "tokens": 1, "capacity": 0 },
+      "p3": { "id": "p3", "type": "place", "label": "Phil 3 Think", "position": { "x": 300, "y": 500 }, "tokens": 1, "capacity": 0 },
+      "p4": { "id": "p4", "type": "place", "label": "Fork 1", "position": { "x": 300, "y": 100 }, "tokens": 1, "capacity": 0 },
+      "p5": { "id": "p5", "type": "place", "label": "Fork 2", "position": { "x": 500, "y": 350 }, "tokens": 1, "capacity": 0 },
+      "p6": { "id": "p6", "type": "place", "label": "Fork 3", "position": { "x": 100, "y": 350 }, "tokens": 1, "capacity": 0 },
+      "p7": { "id": "p7", "type": "place", "label": "Phil 1 Eat", "position": { "x": 150, "y": 250 }, "tokens": 0, "capacity": 0 },
+      "p8": { "id": "p8", "type": "place", "label": "Phil 2 Eat", "position": { "x": 450, "y": 250 }, "tokens": 0, "capacity": 0 },
+      "p9": { "id": "p9", "type": "place", "label": "Phil 3 Eat", "position": { "x": 300, "y": 400 }, "tokens": 0, "capacity": 0 }
+    },
+    "transitions": {
+      "t1": { "id": "t1", "type": "transition", "label": "P1 Take", "position": { "x": 150, "y": 170 }, "delay": 0, "priority": 0 },
+      "t2": { "id": "t2", "type": "transition", "label": "P1 Release", "position": { "x": 150, "y": 330 }, "delay": 0, "priority": 0 },
+      "t3": { "id": "t3", "type": "transition", "label": "P2 Take", "position": { "x": 450, "y": 170 }, "delay": 0, "priority": 0 },
+      "t4": { "id": "t4", "type": "transition", "label": "P2 Release", "position": { "x": 450, "y": 330 }, "delay": 0, "priority": 0 },
+      "t5": { "id": "t5", "type": "transition", "label": "P3 Take", "position": { "x": 300, "y": 450 }, "delay": 0, "priority": 0 },
+      "t6": { "id": "t6", "type": "transition", "label": "P3 Release", "position": { "x": 300, "y": 550 }, "delay": 0, "priority": 0 }
+    },
+    "arcs": {
+      "a1":  { "id": "a1",  "type": "arc", "arcType": "normal", "sourceId": "p1", "targetId": "t1", "weight": 1, "bendPoints": [] },
+      "a2":  { "id": "a2",  "type": "arc", "arcType": "normal", "sourceId": "p4", "targetId": "t1", "weight": 1, "bendPoints": [] },
+      "a3":  { "id": "a3",  "type": "arc", "arcType": "normal", "sourceId": "p6", "targetId": "t1", "weight": 1, "bendPoints": [] },
+      "a4":  { "id": "a4",  "type": "arc", "arcType": "normal", "sourceId": "t1", "targetId": "p7", "weight": 1, "bendPoints": [] },
+      "a5":  { "id": "a5",  "type": "arc", "arcType": "normal", "sourceId": "p7", "targetId": "t2", "weight": 1, "bendPoints": [] },
+      "a6":  { "id": "a6",  "type": "arc", "arcType": "normal", "sourceId": "t2", "targetId": "p1", "weight": 1, "bendPoints": [] },
+      "a7":  { "id": "a7",  "type": "arc", "arcType": "normal", "sourceId": "t2", "targetId": "p4", "weight": 1, "bendPoints": [] },
+      "a8":  { "id": "a8",  "type": "arc", "arcType": "normal", "sourceId": "t2", "targetId": "p6", "weight": 1, "bendPoints": [] },
+      "a9":  { "id": "a9",  "type": "arc", "arcType": "normal", "sourceId": "p2", "targetId": "t3", "weight": 1, "bendPoints": [] },
+      "a10": { "id": "a10", "type": "arc", "arcType": "normal", "sourceId": "p4", "targetId": "t3", "weight": 1, "bendPoints": [] },
+      "a11": { "id": "a11", "type": "arc", "arcType": "normal", "sourceId": "p5", "targetId": "t3", "weight": 1, "bendPoints": [] },
+      "a12": { "id": "a12", "type": "arc", "arcType": "normal", "sourceId": "t3", "targetId": "p8", "weight": 1, "bendPoints": [] },
+      "a13": { "id": "a13", "type": "arc", "arcType": "normal", "sourceId": "p8", "targetId": "t4", "weight": 1, "bendPoints": [] },
+      "a14": { "id": "a14", "type": "arc", "arcType": "normal", "sourceId": "t4", "targetId": "p2", "weight": 1, "bendPoints": [] },
+      "a15": { "id": "a15", "type": "arc", "arcType": "normal", "sourceId": "t4", "targetId": "p4", "weight": 1, "bendPoints": [] },
+      "a16": { "id": "a16", "type": "arc", "arcType": "normal", "sourceId": "t4", "targetId": "p5", "weight": 1, "bendPoints": [] },
+      "a17": { "id": "a17", "type": "arc", "arcType": "normal", "sourceId": "p3", "targetId": "t5", "weight": 1, "bendPoints": [] },
+      "a18": { "id": "a18", "type": "arc", "arcType": "normal", "sourceId": "p5", "targetId": "t5", "weight": 1, "bendPoints": [] },
+      "a19": { "id": "a19", "type": "arc", "arcType": "normal", "sourceId": "p6", "targetId": "t5", "weight": 1, "bendPoints": [] },
+      "a20": { "id": "a20", "type": "arc", "arcType": "normal", "sourceId": "t5", "targetId": "p9", "weight": 1, "bendPoints": [] },
+      "a21": { "id": "a21", "type": "arc", "arcType": "normal", "sourceId": "p9", "targetId": "t6", "weight": 1, "bendPoints": [] },
+      "a22": { "id": "a22", "type": "arc", "arcType": "normal", "sourceId": "t6", "targetId": "p3", "weight": 1, "bendPoints": [] },
+      "a23": { "id": "a23", "type": "arc", "arcType": "normal", "sourceId": "t6", "targetId": "p5", "weight": 1, "bendPoints": [] },
+      "a24": { "id": "a24", "type": "arc", "arcType": "normal", "sourceId": "t6", "targetId": "p6", "weight": 1, "bendPoints": [] }
+    },
+    "annotations": {}
+  }
+}

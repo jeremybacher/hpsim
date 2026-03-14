@@ -4,7 +4,28 @@
       "WebSearch",
       "Bash(npx create-next-app@latest:*)",
       "Bash(npm install:*)",
-      "Bash(npx shadcn@latest init:*)"
+      "Bash(npx shadcn@latest init:*)",
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(npx next build:*)",
+      "Bash(curl:*)",
+      "Bash(source:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(xxd:*)",
+      "Bash(file:*)",
+      "Bash(ls:*)",
+      "Bash(find /Users/jeremybacher/Documents/workspace/hpsim -maxdepth 2 -name .gitignore -o -name next.config.* -o -name tsconfig.json -o -name .npmrc)",
+      "Bash(find /Users/jeremybacher/Documents/workspace/hpsim -type f \\\\\\(-name test* -o -name *test* \\\\\\) ! -path *node_modules* ! -path *.next* ! -path .venv*)",
+      "Bash(lsof:*)",
+      "Bash(kill:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm ls:*)",
+      "Bash(node /tmp/test_parser.mjs:*)",
+      "Bash(grep:*)",
+      "Bash(/tmp/check_constants.txt:*)",
+      "Read(//tmp/**)",
+      "Bash(npm uninstall:*)",
+      "Bash(gh api:*)"
     ]
   }
 }
