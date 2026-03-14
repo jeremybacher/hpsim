@@ -25,7 +25,8 @@
       "Bash(/tmp/check_constants.txt:*)",
       "Read(//tmp/**)",
       "Bash(npm uninstall:*)",
-      "Bash(gh api:*)"
+      "Bash(gh api:*)",
+      "Bash(git log:*)"
     ]
   }
 }
