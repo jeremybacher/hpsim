@@ -331,7 +331,10 @@ export function Canvas() {
   // Keyboard handlers
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'Space') {
+      const tag = (e.target as HTMLElement)?.tagName;
+      const isInput = tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement)?.isContentEditable;
+
+      if (e.code === 'Space' && !isInput) {
         spaceHeldRef.current = true;
         e.preventDefault();
       }
@@ -340,7 +343,7 @@ export function Canvas() {
         clearSelection();
         setTool('select');
       }
-      if (e.code === 'Delete' || e.code === 'Backspace') {
+      if ((e.code === 'Delete' || e.code === 'Backspace') && !isInput) {
         if (selectedIds.length > 0 && mode === 'edit') {
           pushSnapshot();
           removeElements(selectedIds);
@@ -348,7 +351,7 @@ export function Canvas() {
         }
       }
       // Tool shortcuts
-      if (!e.ctrlKey && !e.metaKey && mode === 'edit') {
+      if (!e.ctrlKey && !e.metaKey && !isInput && mode === 'edit') {
         switch (e.code) {
           case 'KeyV':
           case 'Digit1': setTool('select'); break;

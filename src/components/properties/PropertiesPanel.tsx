@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useStore } from '@/store/useStore';
 import { useTranslation } from '@/lib/i18n';
 import { Input } from '@/components/ui/input';
@@ -10,6 +11,31 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { ArcType } from '@/types/petriNet';
+
+function NumericInput({ value, min = 0, onCommit }: { value: number; min?: number; onCommit: (v: number) => void }) {
+  const [draft, setDraft] = useState(String(value));
+  useEffect(() => { setDraft(String(value)); }, [value]);
+  return (
+    <Input
+      type="number"
+      min={min}
+      value={draft}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={() => {
+        const parsed = parseInt(draft);
+        const final = isNaN(parsed) ? min : Math.max(min, parsed);
+        onCommit(final);
+        setDraft(String(final));
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          (e.target as HTMLInputElement).blur();
+        }
+      }}
+      className="h-8 text-sm"
+    />
+  );
+}
 
 export function PropertiesPanel() {
   const { t } = useTranslation();
@@ -111,29 +137,11 @@ export function PropertiesPanel() {
           </div>
           <div className="space-y-2">
             <Label className="text-xs">{t('props.initialTokens')}</Label>
-            <Input
-              type="number"
-              min={0}
-              value={place.tokens}
-              onChange={(e) => {
-                pushSnapshot();
-                updatePlace(id, { tokens: Math.max(0, parseInt(e.target.value) || 0) });
-              }}
-              className="h-8 text-sm"
-            />
+            <NumericInput value={place.tokens} min={0} onCommit={(v) => { pushSnapshot(); updatePlace(id, { tokens: v }); }} />
           </div>
           <div className="space-y-2">
             <Label className="text-xs">{t('props.capacity')}</Label>
-            <Input
-              type="number"
-              min={0}
-              value={place.capacity}
-              onChange={(e) => {
-                pushSnapshot();
-                updatePlace(id, { capacity: Math.max(0, parseInt(e.target.value) || 0) });
-              }}
-              className="h-8 text-sm"
-            />
+            <NumericInput value={place.capacity} min={0} onCommit={(v) => { pushSnapshot(); updatePlace(id, { capacity: v }); }} />
           </div>
           <Separator />
           <div className="text-xs text-muted-foreground">
@@ -165,29 +173,11 @@ export function PropertiesPanel() {
           </div>
           <div className="space-y-2">
             <Label className="text-xs">{t('props.delay')}</Label>
-            <Input
-              type="number"
-              min={0}
-              value={transition.delay}
-              onChange={(e) => {
-                pushSnapshot();
-                updateTransition(id, { delay: Math.max(0, parseInt(e.target.value) || 0) });
-              }}
-              className="h-8 text-sm"
-            />
+            <NumericInput value={transition.delay} min={0} onCommit={(v) => { pushSnapshot(); updateTransition(id, { delay: v }); }} />
           </div>
           <div className="space-y-2">
             <Label className="text-xs">{t('props.priority')}</Label>
-            <Input
-              type="number"
-              min={0}
-              value={transition.priority}
-              onChange={(e) => {
-                pushSnapshot();
-                updateTransition(id, { priority: Math.max(0, parseInt(e.target.value) || 0) });
-              }}
-              className="h-8 text-sm"
-            />
+            <NumericInput value={transition.priority} min={0} onCommit={(v) => { pushSnapshot(); updateTransition(id, { priority: v }); }} />
           </div>
           <Separator />
           <div className="text-xs text-muted-foreground">
@@ -205,16 +195,7 @@ export function PropertiesPanel() {
           <h3 className="font-semibold text-sm">{t('props.arc')}</h3>
           <div className="space-y-2">
             <Label className="text-xs">{t('props.weight')}</Label>
-            <Input
-              type="number"
-              min={1}
-              value={arc.weight}
-              onChange={(e) => {
-                pushSnapshot();
-                updateArc(id, { weight: Math.max(1, parseInt(e.target.value) || 1) });
-              }}
-              className="h-8 text-sm"
-            />
+            <NumericInput value={arc.weight} min={1} onCommit={(v) => { pushSnapshot(); updateArc(id, { weight: v }); }} />
           </div>
           <div className="space-y-2">
             <Label className="text-xs">{t('props.type')}</Label>
