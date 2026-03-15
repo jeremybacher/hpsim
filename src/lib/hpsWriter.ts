@@ -68,20 +68,50 @@ class BinaryWriter {
     this.offset += bytes.length;
   }
 
-  /** Write MFC CString */
+  /** Write MFC CString (Latin-1 for ASCII-safe, Unicode for non-ASCII) */
   writeCString(s: string) {
-    const encoded = new TextEncoder().encode(s);
-    if (encoded.length < 0xFF) {
-      this.writeByte(encoded.length);
-    } else if (encoded.length < 0xFFFE) {
-      this.writeByte(0xFF);
-      this.writeWord(encoded.length);
+    // Check if string is Latin-1 safe (all chars <= 0xFF)
+    const hasNonLatin1 = [...s].some((ch) => ch.charCodeAt(0) > 0xFF);
+
+    if (!hasNonLatin1) {
+      // Write as ANSI (Latin-1)
+      const bytes = new Uint8Array(s.length);
+      for (let i = 0; i < s.length; i++) {
+        bytes[i] = s.charCodeAt(i) & 0xFF;
+      }
+      if (bytes.length < 0xFF) {
+        this.writeByte(bytes.length);
+      } else if (bytes.length < 0xFFFE) {
+        this.writeByte(0xFF);
+        this.writeWord(bytes.length);
+      } else {
+        this.writeByte(0xFF);
+        this.writeWord(0xFFFF);
+        this.writeDword(bytes.length);
+      }
+      this.writeBytes(bytes);
     } else {
+      // Write as Unicode CString: 0xFF + 0xFFFE marker, then length, then UTF-16LE data
+      const utf16 = new Uint8Array(s.length * 2);
+      for (let i = 0; i < s.length; i++) {
+        const code = s.charCodeAt(i);
+        utf16[i * 2] = code & 0xFF;
+        utf16[i * 2 + 1] = (code >> 8) & 0xFF;
+      }
       this.writeByte(0xFF);
-      this.writeWord(0xFFFF);
-      this.writeDword(encoded.length);
+      this.writeWord(0xFFFE);
+      if (s.length < 0xFF) {
+        this.writeByte(s.length);
+      } else if (s.length < 0xFFFE) {
+        this.writeByte(0xFF);
+        this.writeWord(s.length);
+      } else {
+        this.writeByte(0xFF);
+        this.writeWord(0xFFFF);
+        this.writeDword(s.length);
+      }
+      this.writeBytes(utf16);
     }
-    this.writeBytes(encoded);
   }
 
   /** Write MFC CArray<CPoint> */
@@ -281,7 +311,7 @@ export function writeHpsFile(net: PetriNet): ArrayBuffer {
     placeIdents.set(place.id, placeIdentCounter++);
   }
 
-  let transitionIdentCounter = 0;
+  let transitionIdentCounter = 1; // must start at 1, not 0 (owner=0 means "no owner" in parser)
   for (const tr of transitions) {
     transitionIdents.set(tr.id, transitionIdentCounter++);
   }

@@ -131,7 +131,7 @@ export function AppMenubar({ onOpenSamples, onOpenExport, onOpenAnalysis, onOpen
       <input
         ref={fileInputRef}
         type="file"
-        accept=".hps,.json"
+        accept=".hps,.json,application/json,application/octet-stream,*/*"
         className="hidden"
         onChange={handleOpen}
       />

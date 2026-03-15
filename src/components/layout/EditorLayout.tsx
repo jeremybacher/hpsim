@@ -79,7 +79,7 @@ export function EditorLayout() {
         <input
           ref={mobileFileRef}
           type="file"
-          accept=".hps,.json"
+          accept=".hps,.json,application/json,application/octet-stream,*/*"
           className="hidden"
           onChange={handleMobileOpen}
         />
