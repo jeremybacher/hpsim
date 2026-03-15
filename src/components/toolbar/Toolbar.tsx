@@ -67,7 +67,7 @@ export function Toolbar({ onOpenHelp }: ToolbarProps) {
     <TooltipProvider>
       <div
         className={cn(
-          'flex flex-col items-stretch gap-1 p-2 border-r bg-card transition-all duration-200',
+          'hidden md:flex flex-col items-stretch gap-1 p-2 border-r bg-card transition-all duration-200',
           expanded ? 'w-40' : 'w-[52px]'
         )}
       >

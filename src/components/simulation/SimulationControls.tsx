@@ -157,7 +157,7 @@ export function SimulationControls() {
 
   if (mode === 'edit') {
     return (
-      <div className="flex items-center gap-2 px-3 py-2 border-t bg-card">
+      <div className="hidden md:flex items-center gap-2 px-3 py-2 border-t bg-card">
         <Button
           variant="outline"
           size="sm"
@@ -181,7 +181,7 @@ export function SimulationControls() {
   }
 
   return (
-    <div className="flex items-center gap-2 px-3 py-2 border-t bg-card">
+    <div className="flex items-center gap-2 px-3 py-2 border-t bg-card flex-wrap">
       {mode === 'token-game' && (
         <>
           <Button
@@ -226,7 +226,7 @@ export function SimulationControls() {
             </Button>
           )}
 
-          <div className="flex items-center gap-2 min-w-[200px]">
+          <div className="flex items-center gap-2 min-w-[140px] md:min-w-[200px]">
             <span className="text-xs text-muted-foreground whitespace-nowrap">Speed:</span>
             <Slider
               value={[speed]}

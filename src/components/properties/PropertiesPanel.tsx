@@ -22,7 +22,7 @@ export function PropertiesPanel() {
 
   if (mode !== 'edit') {
     return (
-      <div className="w-60 border-l bg-card p-3">
+      <div className="hidden md:block w-60 border-l bg-card p-3">
         <Badge variant="secondary" className="mb-2">Simulation Mode</Badge>
         <p className="text-sm text-muted-foreground">Properties are read-only during simulation.</p>
       </div>
@@ -31,7 +31,7 @@ export function PropertiesPanel() {
 
   if (selectedIds.length === 0) {
     return (
-      <ScrollArea className="w-60 border-l bg-card">
+      <ScrollArea className="hidden md:block w-60 border-l bg-card">
         <div className="p-3 space-y-3">
           <h3 className="font-semibold text-sm">Net Properties</h3>
           <div className="space-y-2">
@@ -76,7 +76,7 @@ export function PropertiesPanel() {
 
   if (selectedIds.length > 1) {
     return (
-      <div className="w-60 border-l bg-card p-3">
+      <div className="hidden md:block w-60 border-l bg-card p-3">
         <Badge variant="secondary">{selectedIds.length} selected</Badge>
       </div>
     );
@@ -90,11 +90,11 @@ export function PropertiesPanel() {
 
   if (place) {
     return (
-      <ScrollArea className="w-60 border-l bg-card">
+      <ScrollArea className="hidden md:block w-60 border-l bg-card">
         <div className="p-3 space-y-3">
-          <div className="flex items-center gap-2">
+          <div className="space-y-1">
             <h3 className="font-semibold text-sm">Place</h3>
-            <Badge variant="outline" className="text-xs h-5">{place.label}</Badge>
+            <p className="text-xs text-muted-foreground break-words">{place.label}</p>
           </div>
           <div className="space-y-2">
             <Label className="text-xs">Label</Label>
@@ -144,11 +144,11 @@ export function PropertiesPanel() {
 
   if (transition) {
     return (
-      <ScrollArea className="w-60 border-l bg-card">
+      <ScrollArea className="hidden md:block w-60 border-l bg-card">
         <div className="p-3 space-y-3">
-          <div className="flex items-center gap-2">
+          <div className="space-y-1">
             <h3 className="font-semibold text-sm">Transition</h3>
-            <Badge variant="outline" className="text-xs h-5">{transition.label}</Badge>
+            <p className="text-xs text-muted-foreground break-words">{transition.label}</p>
           </div>
           <div className="space-y-2">
             <Label className="text-xs">Label</Label>
@@ -198,7 +198,7 @@ export function PropertiesPanel() {
 
   if (arc) {
     return (
-      <ScrollArea className="w-60 border-l bg-card">
+      <ScrollArea className="hidden md:block w-60 border-l bg-card">
         <div className="p-3 space-y-3">
           <h3 className="font-semibold text-sm">Arc</h3>
           <div className="space-y-2">
@@ -245,7 +245,7 @@ export function PropertiesPanel() {
 
   if (annotation) {
     return (
-      <ScrollArea className="w-60 border-l bg-card">
+      <ScrollArea className="hidden md:block w-60 border-l bg-card">
         <div className="p-3 space-y-3">
           <h3 className="font-semibold text-sm">Text Annotation</h3>
           <div className="space-y-2">
@@ -270,7 +270,7 @@ export function PropertiesPanel() {
   }
 
   return (
-    <div className="w-60 border-l bg-card p-3">
+    <div className="hidden md:block w-60 border-l bg-card p-3">
       <p className="text-sm text-muted-foreground">No properties available.</p>
     </div>
   );
