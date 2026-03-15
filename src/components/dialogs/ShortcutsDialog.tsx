@@ -38,6 +38,9 @@ const shortcuts: Array<{
     items: [
       { keys: ['Ctrl+Z'], descKey: 'shortcuts.undo' },
       { keys: ['Ctrl+Y', 'Ctrl+Shift+Z'], descKey: 'shortcuts.redo' },
+      { keys: ['Ctrl+C'], descKey: 'shortcuts.copy' },
+      { keys: ['Ctrl+X'], descKey: 'shortcuts.cut' },
+      { keys: ['Ctrl+V'], descKey: 'shortcuts.paste' },
       { keys: ['Ctrl+A'], descKey: 'shortcuts.selectAll' },
       { keys: ['Delete', 'Backspace'], descKey: 'shortcuts.deleteSelected' },
       { keys: ['Escape'], descKey: 'shortcuts.cancelDeselect' },

@@ -61,6 +61,14 @@ class BinaryReader {
     return v;
   }
 
+  /** Read signed 32-bit integer (for coordinates, which can be negative) */
+  readInt32(): number {
+    this.checkBounds(4, 'readInt32');
+    const v = this.view.getInt32(this.offset, true);
+    this.offset += 4;
+    return v;
+  }
+
   readDouble(): number {
     this.checkBounds(8, 'readDouble');
     const v = this.view.getFloat64(this.offset, true);
@@ -188,8 +196,8 @@ class BinaryReader {
     }
     const points: Array<{ x: number; y: number }> = [];
     for (let i = 0; i < count; i++) {
-      const x = this.readDword();
-      const y = this.readDword();
+      const x = this.readInt32();
+      const y = this.readInt32();
       points.push({ x, y });
     }
     return points;
@@ -287,10 +295,10 @@ interface DocumentFooter {
 
 function readRect(r: BinaryReader) {
   return {
-    left: r.readDword(),
-    top: r.readDword(),
-    right: r.readDword(),
-    bottom: r.readDword(),
+    left: r.readInt32(),
+    top: r.readInt32(),
+    right: r.readInt32(),
+    bottom: r.readInt32(),
   };
 }
 
@@ -328,8 +336,8 @@ function readTransition(r: BinaryReader): ParsedTransition {
 
 function readConnector(r: BinaryReader): ParsedConnector {
   const rect = readRect(r);
-  r.readDword(); r.readDword(); // arrow1
-  r.readDword(); r.readDword(); // arrow2
+  r.readInt32(); r.readInt32(); // arrow1
+  r.readInt32(); r.readInt32(); // arrow2
   const ident = r.readDword();
   const from = r.readDword();
   const to = r.readDword();
@@ -346,10 +354,10 @@ function readConnector(r: BinaryReader): ParsedConnector {
 
 function readLabel(r: BinaryReader): ParsedLabel {
   const text = r.readCString();
-  const top = r.readDword();
-  const left = r.readDword();
-  const bottom = r.readDword();
-  const right = r.readDword();
+  const top = r.readInt32();
+  const left = r.readInt32();
+  const bottom = r.readInt32();
+  const right = r.readInt32();
   const owner = r.readDword();
   const subIdent = r.readDword();
   const visible = r.readByte() !== 0;
@@ -380,10 +388,10 @@ function readCHLine(r: BinaryReader): ParsedLine {
 }
 
 function readCHText(r: BinaryReader): ParsedText {
-  const top = r.readDword();
-  const left = r.readDword();
-  const bottom = r.readDword();
-  const right = r.readDword();
+  const top = r.readInt32();
+  const left = r.readInt32();
+  const bottom = r.readInt32();
+  const right = r.readInt32();
   r.readDword(); // color
   // LOGFONT: 5 DWORDs + 8 BYTEs + 32 bytes face name
   r.readDword(); r.readDword(); r.readDword(); r.readDword(); r.readDword();

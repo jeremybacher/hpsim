@@ -12,7 +12,7 @@ import { SelectionBox } from './SelectionBox';
 import { GhostArc } from './GhostArc';
 import { useCanvasTooltip, CanvasTooltipOverlay } from './CanvasTooltip';
 import { screenToWorld, isCircleInRect, isRectInRect } from '@/lib/geometry';
-import { DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT, ZOOM_STEP, PLACE_RADIUS, TRANSITION_WIDTH, TRANSITION_HEIGHT } from '@/lib/constants';
+import { ZOOM_STEP, PLACE_RADIUS, TRANSITION_WIDTH, TRANSITION_HEIGHT } from '@/lib/constants';
 
 export function Canvas() {
   const svgRef = useRef<SVGSVGElement>(null);
@@ -384,6 +384,21 @@ export function Canvas() {
         e.preventDefault();
         useStore.getState().redo();
       }
+      // Copy
+      if ((e.ctrlKey || e.metaKey) && e.code === 'KeyC' && !isInput) {
+        e.preventDefault();
+        useStore.getState().copyElements();
+      }
+      // Cut
+      if ((e.ctrlKey || e.metaKey) && e.code === 'KeyX' && !isInput) {
+        e.preventDefault();
+        useStore.getState().cutElements();
+      }
+      // Paste
+      if ((e.ctrlKey || e.metaKey) && e.code === 'KeyV' && !isInput) {
+        e.preventDefault();
+        useStore.getState().pasteElements();
+      }
       // Select all
       if ((e.ctrlKey || e.metaKey) && e.code === 'KeyA') {
         e.preventDefault();
@@ -530,13 +545,20 @@ export function Canvas() {
       <SvgDefs />
 
       <g transform={`translate(${viewTransform.x}, ${viewTransform.y}) scale(${viewTransform.zoom})`}>
-        {/* Grid */}
-        {showGrid && (
-          <>
-            <Grid width={DEFAULT_CANVAS_WIDTH} height={DEFAULT_CANVAS_HEIGHT} />
-            <use href="#grid-bg" x={-DEFAULT_CANVAS_WIDTH / 2} y={-DEFAULT_CANVAS_HEIGHT / 2} />
-          </>
-        )}
+        {/* Grid - covers visible viewport */}
+        {showGrid && (() => {
+          const vx = -viewTransform.x / viewTransform.zoom;
+          const vy = -viewTransform.y / viewTransform.zoom;
+          const svgEl = svgRef.current;
+          const vw = (svgEl?.clientWidth ?? 4000) / viewTransform.zoom;
+          const vh = (svgEl?.clientHeight ?? 3000) / viewTransform.zoom;
+          return (
+            <>
+              <Grid width={vw} height={vh} />
+              <use href="#grid-bg" x={vx} y={vy} />
+            </>
+          );
+        })()}
 
         {/* Arcs (render first, behind nodes) */}
         {Object.values(net.arcs).map((arc) => {

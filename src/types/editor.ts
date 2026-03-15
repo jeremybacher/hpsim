@@ -1,4 +1,13 @@
-import type { Position } from './petriNet';
+import type { Position, Place, Transition, Arc, Annotation } from './petriNet';
+
+export interface ClipboardData {
+  places: Place[];
+  transitions: Transition[];
+  arcs: Arc[];
+  annotations: Annotation[];
+  anchorX: number;
+  anchorY: number;
+}
 
 export type Tool =
   | 'select'
@@ -36,4 +45,5 @@ export interface EditorState {
   gridSize: number;
   showGrid: boolean;
   isPanning: boolean;
+  clipboard: ClipboardData | null;
 }

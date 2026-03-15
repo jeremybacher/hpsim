@@ -56,6 +56,13 @@ class BinaryWriter {
     this.offset += 4;
   }
 
+  /** Write signed 32-bit integer (for coordinates, which can be negative) */
+  writeInt32(v: number) {
+    this.ensureCapacity(4);
+    this.view.setInt32(this.offset, v, true);
+    this.offset += 4;
+  }
+
   writeDouble(v: number) {
     this.ensureCapacity(8);
     this.view.setFloat64(this.offset, v, true);
@@ -123,8 +130,8 @@ class BinaryWriter {
       this.writeDword(points.length);
     }
     for (const p of points) {
-      this.writeDword(Math.round(p.x));
-      this.writeDword(Math.round(p.y));
+      this.writeInt32(Math.round(p.x));
+      this.writeInt32(Math.round(p.y));
     }
   }
 
@@ -168,10 +175,10 @@ class ClassTagWriter {
 // ── Object serializers ─────────────────────────────────────────────
 
 function writeRect(w: BinaryWriter, rect: { left: number; top: number; right: number; bottom: number }) {
-  w.writeDword(Math.round(rect.left));
-  w.writeDword(Math.round(rect.top));
-  w.writeDword(Math.round(rect.right));
-  w.writeDword(Math.round(rect.bottom));
+  w.writeInt32(Math.round(rect.left));
+  w.writeInt32(Math.round(rect.top));
+  w.writeInt32(Math.round(rect.right));
+  w.writeInt32(Math.round(rect.bottom));
 }
 
 function placeToRect(place: Place) {
@@ -253,10 +260,10 @@ function writeConnector(
   writeRect(w, rect);
 
   // Arrow points (approximate)
-  w.writeDword(Math.round(targetPos.x - 5));
-  w.writeDword(Math.round(targetPos.y - 5));
-  w.writeDword(Math.round(targetPos.x + 5));
-  w.writeDword(Math.round(targetPos.y + 5));
+  w.writeInt32(Math.round(targetPos.x - 5));
+  w.writeInt32(Math.round(targetPos.y - 5));
+  w.writeInt32(Math.round(targetPos.x + 5));
+  w.writeInt32(Math.round(targetPos.y + 5));
 
   w.writeDword(ident);
   w.writeDword(fromIdent);
@@ -280,10 +287,10 @@ function writeConnector(
 
 function writeLabel(w: BinaryWriter, text: string, ownerIdent: number, subIdent: number, rect: { top: number; left: number; bottom: number; right: number }) {
   w.writeCString(text);
-  w.writeDword(Math.round(rect.top));
-  w.writeDword(Math.round(rect.left));
-  w.writeDword(Math.round(rect.bottom));
-  w.writeDword(Math.round(rect.right));
+  w.writeInt32(Math.round(rect.top));
+  w.writeInt32(Math.round(rect.left));
+  w.writeInt32(Math.round(rect.bottom));
+  w.writeInt32(Math.round(rect.right));
   w.writeDword(ownerIdent);
   w.writeDword(subIdent);
   w.writeByte(1); // visible

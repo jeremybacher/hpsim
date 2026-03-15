@@ -68,6 +68,10 @@ export function AppMenubar({ onOpenSamples, onOpenExport, onOpenAnalysis, onOpen
   const removeElements = useStore((s) => s.removeElements);
   const selectedIds = useStore((s) => s.selectedIds);
   const clearSelection = useStore((s) => s.clearSelection);
+  const copyElements = useStore((s) => s.copyElements);
+  const cutElements = useStore((s) => s.cutElements);
+  const pasteElements = useStore((s) => s.pasteElements);
+  const clipboard = useStore((s) => s.clipboard);
   const setMode = useStore((s) => s.setMode);
   const clearHistory = useStore((s) => s.clearHistory);
 
@@ -205,6 +209,16 @@ export function AppMenubar({ onOpenSamples, onOpenExport, onOpenAnalysis, onOpen
             </MenubarItem>
             <MenubarItem onClick={redo} disabled={mode !== 'edit'}>
               {t('menu.edit.redo')} <MenubarShortcut>Ctrl+Y</MenubarShortcut>
+            </MenubarItem>
+            <MenubarSeparator />
+            <MenubarItem onClick={cutElements} disabled={mode !== 'edit' || selectedIds.length === 0}>
+              {t('menu.edit.cut')} <MenubarShortcut>Ctrl+X</MenubarShortcut>
+            </MenubarItem>
+            <MenubarItem onClick={copyElements} disabled={mode !== 'edit' || selectedIds.length === 0}>
+              {t('menu.edit.copy')} <MenubarShortcut>Ctrl+C</MenubarShortcut>
+            </MenubarItem>
+            <MenubarItem onClick={pasteElements} disabled={mode !== 'edit' || !clipboard}>
+              {t('menu.edit.paste')} <MenubarShortcut>Ctrl+V</MenubarShortcut>
             </MenubarItem>
             <MenubarSeparator />
             <MenubarItem onClick={selectAll} disabled={mode !== 'edit'}>

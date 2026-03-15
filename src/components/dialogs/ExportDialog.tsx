@@ -130,6 +130,8 @@ export function ExportDialog({ open, onOpenChange }: ExportDialogProps) {
   };
 
   const handleExport = async () => {
+    const netName = useStore.getState().net.name || 'petri-net';
+    const baseName = netName.replace(/\.hps$/i, '').replace(/[^\w\s-]/g, '').trim() || 'petri-net';
     const svgElement = document.querySelector('svg.w-full.h-full') as SVGSVGElement | null;
     if (!svgElement) {
       toast.error('No canvas found to export');
@@ -189,7 +191,7 @@ export function ExportDialog({ open, onOpenChange }: ExportDialogProps) {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'petri-net.svg';
+      a.download = `${baseName}.svg`;
       a.click();
       URL.revokeObjectURL(url);
       toast.success('SVG exported successfully');
@@ -226,7 +228,7 @@ export function ExportDialog({ open, onOpenChange }: ExportDialogProps) {
               const url = URL.createObjectURL(blob);
               const a = document.createElement('a');
               a.href = url;
-              a.download = 'petri-net.png';
+              a.download = `${baseName}.png`;
               a.click();
               URL.revokeObjectURL(url);
               resolve();
