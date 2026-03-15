@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { I18nProvider } from "@/lib/i18n";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -20,9 +21,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-          <TooltipProvider>
-            {children}
-          </TooltipProvider>
+          <I18nProvider>
+            <TooltipProvider>
+              {children}
+            </TooltipProvider>
+          </I18nProvider>
         </ThemeProvider>
       </body>
     </html>

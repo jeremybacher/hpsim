@@ -10,6 +10,7 @@ import { ArcPath } from './ArcPath';
 import { AnnotationNode } from './AnnotationNode';
 import { SelectionBox } from './SelectionBox';
 import { GhostArc } from './GhostArc';
+import { useCanvasTooltip, CanvasTooltipOverlay } from './CanvasTooltip';
 import { screenToWorld, isCircleInRect, isRectInRect } from '@/lib/geometry';
 import { DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT, ZOOM_STEP, PLACE_RADIUS, TRANSITION_WIDTH, TRANSITION_HEIGHT } from '@/lib/constants';
 
@@ -57,6 +58,9 @@ export function Canvas() {
   // Annotation editing state
   const [editingAnnotationId, setEditingAnnotationId] = useState<string | null>(null);
 
+  // Canvas tooltip
+  const { tooltip, handleMouseMoveForTooltip, clearTooltip } = useCanvasTooltip(svgRef);
+
   const getWorldPos = useCallback((e: React.MouseEvent | MouseEvent) => {
     if (!svgRef.current) return { x: 0, y: 0 };
     const rect = svgRef.current.getBoundingClientRect();
@@ -97,6 +101,7 @@ export function Canvas() {
   const fireTransitionFn = useStore((s) => s.fireTransitionHandler);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    clearTooltip();
     if (e.button === 2) return; // right click
 
     const worldPos = getWorldPos(e);
@@ -498,6 +503,8 @@ export function Canvas() {
   ) : null;
 
   return (
+    <>
+    <CanvasTooltipOverlay tooltip={tooltip} />
     <svg
       ref={svgRef}
       className="w-full h-full bg-background"
@@ -506,9 +513,9 @@ export function Canvas() {
         touchAction: 'none',
       }}
       onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
+      onMouseMove={(e) => { handleMouseMove(e); handleMouseMoveForTooltip(e); }}
       onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
+      onMouseLeave={(e) => { handleMouseUp(); clearTooltip(); }}
       onWheel={handleWheel}
       onDoubleClick={handleDoubleClick}
       onTouchStart={handleTouchStart}
@@ -604,5 +611,6 @@ export function Canvas() {
         {selectionBox && <SelectionBox box={selectionBox} />}
       </g>
     </svg>
+    </>
   );
 }

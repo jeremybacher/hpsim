@@ -68,10 +68,10 @@ class BinaryWriter {
     this.offset += bytes.length;
   }
 
-  /** Write MFC CString (Latin-1 for ASCII-safe, Unicode for non-ASCII) */
+  /** Write MFC CString (ASCII as ANSI, anything else as Unicode UTF-16LE) */
   writeCString(s: string) {
-    // Check if string is Latin-1 safe (all chars <= 0xFF)
-    const hasNonLatin1 = [...s].some((ch) => ch.charCodeAt(0) > 0xFF);
+    // Use Unicode for any non-ASCII character to avoid encoding issues
+    const hasNonLatin1 = [...s].some((ch) => ch.charCodeAt(0) > 0x7F);
 
     if (!hasNonLatin1) {
       // Write as ANSI (Latin-1)

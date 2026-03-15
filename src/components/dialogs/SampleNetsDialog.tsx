@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useStore } from '@/store/useStore';
+import { useTranslation } from '@/lib/i18n';
+import type { TranslationKey } from '@/lib/i18n';
 import {
   Dialog,
   DialogContent,
@@ -15,40 +17,40 @@ import { deserializeAuto } from '@/lib/serialization';
 import { toast } from 'sonner';
 
 interface SampleNet {
-  name: string;
-  description: string;
+  nameKey: TranslationKey;
+  descKey: TranslationKey;
   filename: string;
   tags: string[];
 }
 
 const sampleNets: SampleNet[] = [
   {
-    name: 'Simple Sequence',
-    description: 'A basic sequential flow: P1 -> T1 -> P2 -> T2 -> P3',
+    nameKey: 'samples.simpleSequence',
+    descKey: 'samples.simpleSequenceDesc',
     filename: 'simple-sequence.hps',
     tags: ['basic'],
   },
   {
-    name: 'Producer-Consumer',
-    description: 'Producer fills a bounded buffer, consumer empties it',
+    nameKey: 'samples.producerConsumer',
+    descKey: 'samples.producerConsumerDesc',
     filename: 'producer-consumer.hps',
     tags: ['classic', 'bounded'],
   },
   {
-    name: 'Mutual Exclusion',
-    description: 'Two processes competing for a shared mutex resource',
+    nameKey: 'samples.mutualExclusion',
+    descKey: 'samples.mutualExclusionDesc',
     filename: 'mutual-exclusion.hps',
     tags: ['classic', 'sync'],
   },
   {
-    name: 'Dining Philosophers (3)',
-    description: 'Three philosophers sharing forks around a table',
+    nameKey: 'samples.diningPhilosophers',
+    descKey: 'samples.diningPhilosophersDesc',
     filename: 'dining-philosophers.hps',
     tags: ['classic', 'deadlock'],
   },
   {
-    name: 'Reader-Writer',
-    description: 'Multiple concurrent readers, exclusive writer access',
+    nameKey: 'samples.readerWriter',
+    descKey: 'samples.readerWriterDesc',
     filename: 'reader-writer.hps',
     tags: ['classic', 'sync'],
   },
@@ -60,6 +62,7 @@ interface SampleNetsDialogProps {
 }
 
 export function SampleNetsDialog({ open, onOpenChange }: SampleNetsDialogProps) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const setNet = useStore((s) => s.setNet);
   const pushSnapshot = useStore((s) => s.pushSnapshot);
@@ -76,9 +79,9 @@ export function SampleNetsDialog({ open, onOpenChange }: SampleNetsDialogProps) 
       setNet(net);
       clearHistory();
       onOpenChange(false);
-      toast.success(`Loaded sample: ${net.name}`);
+      toast.success(t('toast.sampleLoaded', { name: net.name }));
     } catch (err) {
-      toast.error('Failed to load sample: ' + (err instanceof Error ? err.message : 'Unknown error'));
+      toast.error(t('toast.sampleFailed') + ': ' + (err instanceof Error ? err.message : 'Unknown error'));
     } finally {
       setLoading(false);
     }
@@ -88,7 +91,7 @@ export function SampleNetsDialog({ open, onOpenChange }: SampleNetsDialogProps) 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Sample Petri Nets</DialogTitle>
+          <DialogTitle>{t('samples.title')}</DialogTitle>
         </DialogHeader>
         <ScrollArea className="max-h-[60vh]">
           <div className="space-y-2 pr-4">
@@ -101,7 +104,7 @@ export function SampleNetsDialog({ open, onOpenChange }: SampleNetsDialogProps) 
                 disabled={loading}
               >
                 <div className="flex items-center gap-2 w-full">
-                  <span className="font-medium text-sm">{sample.name}</span>
+                  <span className="font-medium text-sm">{t(sample.nameKey)}</span>
                   <div className="flex gap-1 ml-auto">
                     {sample.tags.map((tag) => (
                       <Badge key={tag} variant="secondary" className="text-[10px] h-4 px-1.5">
@@ -110,7 +113,7 @@ export function SampleNetsDialog({ open, onOpenChange }: SampleNetsDialogProps) 
                     ))}
                   </div>
                 </div>
-                <span className="text-xs text-muted-foreground font-normal">{sample.description}</span>
+                <span className="text-xs text-muted-foreground font-normal">{t(sample.descKey)}</span>
               </Button>
             ))}
           </div>

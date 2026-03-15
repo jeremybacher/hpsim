@@ -9,76 +9,83 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useTranslation } from '@/lib/i18n';
+import type { TranslationKey } from '@/lib/i18n';
 
 interface ShortcutsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-const shortcuts = [
+const shortcuts: Array<{
+  groupKey: TranslationKey;
+  items: Array<{ keys: string[]; descKey: TranslationKey }>;
+}> = [
   {
-    group: 'Tools',
+    groupKey: 'shortcuts.tools',
     items: [
-      { keys: ['V', '1'], description: 'Select tool' },
-      { keys: ['P', '2'], description: 'Place tool' },
-      { keys: ['T', '3'], description: 'Transition tool' },
-      { keys: ['A', '4'], description: 'Arc tool' },
-      { keys: ['K', '5'], description: 'Token tool' },
-      { keys: ['X', '6'], description: 'Delete tool' },
-      { keys: ['N', '7'], description: 'Text annotation tool' },
+      { keys: ['V', '1'], descKey: 'shortcuts.selectTool' },
+      { keys: ['P', '2'], descKey: 'shortcuts.placeTool' },
+      { keys: ['T', '3'], descKey: 'shortcuts.transitionTool' },
+      { keys: ['A', '4'], descKey: 'shortcuts.arcTool' },
+      { keys: ['K', '5'], descKey: 'shortcuts.tokenTool' },
+      { keys: ['X', '6'], descKey: 'shortcuts.deleteTool' },
+      { keys: ['N', '7'], descKey: 'shortcuts.annotationTool' },
     ],
   },
   {
-    group: 'Edit',
+    groupKey: 'shortcuts.edit',
     items: [
-      { keys: ['Ctrl+Z'], description: 'Undo' },
-      { keys: ['Ctrl+Y', 'Ctrl+Shift+Z'], description: 'Redo' },
-      { keys: ['Ctrl+A'], description: 'Select all' },
-      { keys: ['Delete', 'Backspace'], description: 'Delete selected' },
-      { keys: ['Escape'], description: 'Cancel / Deselect' },
+      { keys: ['Ctrl+Z'], descKey: 'shortcuts.undo' },
+      { keys: ['Ctrl+Y', 'Ctrl+Shift+Z'], descKey: 'shortcuts.redo' },
+      { keys: ['Ctrl+A'], descKey: 'shortcuts.selectAll' },
+      { keys: ['Delete', 'Backspace'], descKey: 'shortcuts.deleteSelected' },
+      { keys: ['Escape'], descKey: 'shortcuts.cancelDeselect' },
     ],
   },
   {
-    group: 'Navigation',
+    groupKey: 'shortcuts.navigation',
     items: [
-      { keys: ['Space + Drag'], description: 'Pan canvas' },
-      { keys: ['Middle-click + Drag'], description: 'Pan canvas' },
-      { keys: ['Scroll wheel'], description: 'Zoom in/out' },
+      { keys: ['Space + Drag'], descKey: 'shortcuts.panCanvas' },
+      { keys: ['Middle-click + Drag'], descKey: 'shortcuts.panCanvas' },
+      { keys: ['Scroll wheel'], descKey: 'shortcuts.zoom' },
     ],
   },
   {
-    group: 'Selection',
+    groupKey: 'shortcuts.selection',
     items: [
-      { keys: ['Click'], description: 'Select element' },
-      { keys: ['Shift + Click'], description: 'Add to selection' },
-      { keys: ['Click + Drag (empty area)'], description: 'Rubber-band selection' },
+      { keys: ['Click'], descKey: 'shortcuts.selectElement' },
+      { keys: ['Shift + Click'], descKey: 'shortcuts.addToSelection' },
+      { keys: ['Click + Drag (empty area)'], descKey: 'shortcuts.rubberBand' },
     ],
   },
   {
-    group: 'Tokens',
+    groupKey: 'shortcuts.tokens',
     items: [
-      { keys: ['Click (Token tool)'], description: 'Add token to place' },
-      { keys: ['Shift + Click (Token tool)'], description: 'Remove token from place' },
+      { keys: ['Click (Token tool)'], descKey: 'shortcuts.addToken' },
+      { keys: ['Shift + Click (Token tool)'], descKey: 'shortcuts.removeToken' },
     ],
   },
 ];
 
 export function ShortcutsDialog({ open, onOpenChange }: ShortcutsDialogProps) {
+  const { t } = useTranslation();
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Keyboard Shortcuts</DialogTitle>
+          <DialogTitle>{t('shortcuts.title')}</DialogTitle>
         </DialogHeader>
         <ScrollArea className="max-h-[60vh]">
           <div className="space-y-4 pr-4">
             {shortcuts.map((section, si) => (
               <div key={si}>
-                <h4 className="text-sm font-semibold mb-2">{section.group}</h4>
+                <h4 className="text-sm font-semibold mb-2">{t(section.groupKey)}</h4>
                 <div className="space-y-1.5">
                   {section.items.map((item, ii) => (
                     <div key={ii} className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">{item.description}</span>
+                      <span className="text-sm text-muted-foreground">{t(item.descKey)}</span>
                       <div className="flex gap-1">
                         {item.keys.map((key, ki) => (
                           <span key={ki} className="flex items-center gap-0.5">

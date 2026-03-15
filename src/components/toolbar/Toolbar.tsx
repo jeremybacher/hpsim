@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import { useStore } from '@/store/useStore';
+import { useTranslation } from '@/lib/i18n';
 import type { Tool } from '@/types/editor';
+import type { TranslationKey } from '@/lib/i18n';
 import { Separator } from '@/components/ui/separator';
 import {
   Tooltip,
@@ -13,7 +15,7 @@ import {
 import {
   MousePointer2,
   Circle,
-  RectangleVertical,
+  RectangleHorizontal,
   ArrowRight,
   Coins,
   Trash2,
@@ -26,18 +28,18 @@ import { cn } from '@/lib/utils';
 
 const tools: Array<{
   id: Tool;
-  label: string;
+  labelKey: TranslationKey;
   icon: React.ComponentType<{ className?: string }>;
   shortcut: string;
   group: number;
 }> = [
-  { id: 'select', label: 'Select', icon: MousePointer2, shortcut: 'V / 1', group: 0 },
-  { id: 'place', label: 'Place', icon: Circle, shortcut: 'P / 2', group: 0 },
-  { id: 'transition', label: 'Transition', icon: RectangleVertical, shortcut: 'T / 3', group: 0 },
-  { id: 'arc', label: 'Arc', icon: ArrowRight, shortcut: 'A / 4', group: 0 },
-  { id: 'token', label: 'Token', icon: Coins, shortcut: 'K / 5', group: 1 },
-  { id: 'delete', label: 'Delete', icon: Trash2, shortcut: 'X / 6', group: 1 },
-  { id: 'annotation', label: 'Text', icon: Type, shortcut: 'N / 7', group: 2 },
+  { id: 'select', labelKey: 'tool.select', icon: MousePointer2, shortcut: 'V', group: 0 },
+  { id: 'place', labelKey: 'tool.place', icon: Circle, shortcut: 'P', group: 0 },
+  { id: 'transition', labelKey: 'tool.transition', icon: RectangleHorizontal, shortcut: 'T', group: 0 },
+  { id: 'arc', labelKey: 'tool.arc', icon: ArrowRight, shortcut: 'A', group: 0 },
+  { id: 'token', labelKey: 'tool.token', icon: Coins, shortcut: 'K', group: 1 },
+  { id: 'delete', labelKey: 'tool.delete', icon: Trash2, shortcut: 'X', group: 1 },
+  { id: 'annotation', labelKey: 'tool.annotation', icon: Type, shortcut: 'N', group: 2 },
 ];
 
 interface ToolbarProps {
@@ -45,6 +47,7 @@ interface ToolbarProps {
 }
 
 export function Toolbar({ onOpenHelp }: ToolbarProps) {
+  const { t } = useTranslation();
   const tool = useStore((s) => s.tool);
   const setTool = useStore((s) => s.setTool);
   const mode = useStore((s) => s.mode);
@@ -66,6 +69,7 @@ export function Toolbar({ onOpenHelp }: ToolbarProps) {
   return (
     <TooltipProvider>
       <div
+        data-tour="toolbar"
         className={cn(
           'hidden md:flex flex-col items-stretch gap-1 p-2 border-r bg-card transition-all duration-200',
           expanded ? 'w-40' : 'w-[52px]'
@@ -76,7 +80,7 @@ export function Toolbar({ onOpenHelp }: ToolbarProps) {
           type="button"
           className="h-7 w-7 self-end mb-1 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
           onClick={() => setExpanded(!expanded)}
-          title={expanded ? 'Collapse toolbar' : 'Expand toolbar'}
+          title={expanded ? t('toolbar.collapse') : t('toolbar.expand')}
         >
           {expanded ? (
             <PanelLeftClose className="h-3.5 w-3.5" />
@@ -85,27 +89,28 @@ export function Toolbar({ onOpenHelp }: ToolbarProps) {
           )}
         </button>
 
-        {tools.map((t) => {
-          const Icon = t.icon;
-          const isActive = tool === t.id;
-          const showSep = t.group !== lastGroup;
-          lastGroup = t.group;
+        {tools.map((toolDef) => {
+          const Icon = toolDef.icon;
+          const isActive = tool === toolDef.id;
+          const showSep = toolDef.group !== lastGroup;
+          lastGroup = toolDef.group;
+          const label = t(toolDef.labelKey);
 
           if (expanded) {
             return (
-              <div key={t.id}>
+              <div key={toolDef.id}>
                 {showSep && <Separator className="my-1" />}
                 <button
                   type="button"
                   className={toolButtonClass(isActive)}
-                  onClick={() => isEditing && setTool(t.id)}
+                  onClick={() => isEditing && setTool(toolDef.id)}
                   disabled={!isEditing}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
-                  <span className="text-xs truncate">{t.label}</span>
-                  {t.shortcut && (
+                  <span className="text-xs truncate">{label}</span>
+                  {toolDef.shortcut && (
                     <span className="ml-auto text-[10px] font-mono opacity-60">
-                      {t.shortcut.split(' / ')[0]}
+                      {toolDef.shortcut.split(' / ')[0]}
                     </span>
                   )}
                 </button>
@@ -114,21 +119,21 @@ export function Toolbar({ onOpenHelp }: ToolbarProps) {
           }
 
           return (
-            <div key={t.id}>
+            <div key={toolDef.id}>
               {showSep && <Separator className="my-1" />}
               <Tooltip>
                 <TooltipTrigger
                   className={toolButtonClass(isActive)}
-                  onClick={() => isEditing && setTool(t.id)}
+                  onClick={() => isEditing && setTool(toolDef.id)}
                   disabled={!isEditing}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
                 </TooltipTrigger>
                 <TooltipContent side="right">
-                  {t.label}
-                  {t.shortcut && (
+                  {label}
+                  {toolDef.shortcut && (
                     <span className="ml-1.5 opacity-60 font-mono">
-                      {t.shortcut}
+                      {toolDef.shortcut}
                     </span>
                   )}
                 </TooltipContent>
@@ -149,7 +154,7 @@ export function Toolbar({ onOpenHelp }: ToolbarProps) {
             onClick={onOpenHelp}
           >
             <HelpCircle className="h-4 w-4 shrink-0" />
-            <span className="text-xs">Help</span>
+            <span className="text-xs">{t('tool.help')}</span>
           </button>
         ) : (
           <Tooltip>
@@ -159,7 +164,7 @@ export function Toolbar({ onOpenHelp }: ToolbarProps) {
             >
               <HelpCircle className="h-4 w-4" />
             </TooltipTrigger>
-            <TooltipContent side="right">Help</TooltipContent>
+            <TooltipContent side="right">{t('tool.help')}</TooltipContent>
           </Tooltip>
         )}
       </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useStore } from '@/store/useStore';
+import { useTranslation } from '@/lib/i18n';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,6 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import type { ArcType } from '@/types/petriNet';
 
 export function PropertiesPanel() {
+  const { t } = useTranslation();
   const net = useStore((s) => s.net);
   const selectedIds = useStore((s) => s.selectedIds);
   const updatePlace = useStore((s) => s.updatePlace);
@@ -22,20 +24,20 @@ export function PropertiesPanel() {
 
   if (mode !== 'edit') {
     return (
-      <div className="hidden md:block w-60 border-l bg-card p-3">
-        <Badge variant="secondary" className="mb-2">Simulation Mode</Badge>
-        <p className="text-sm text-muted-foreground">Properties are read-only during simulation.</p>
+      <div data-tour="properties" className="hidden md:block w-60 border-l bg-card p-3">
+        <Badge variant="secondary" className="mb-2">{t('props.simulationMode')}</Badge>
+        <p className="text-sm text-muted-foreground">{t('props.readOnly')}</p>
       </div>
     );
   }
 
   if (selectedIds.length === 0) {
     return (
-      <ScrollArea className="hidden md:block w-60 border-l bg-card">
+      <ScrollArea data-tour="properties" className="hidden md:block w-60 border-l bg-card">
         <div className="p-3 space-y-3">
-          <h3 className="font-semibold text-sm">Net Properties</h3>
+          <h3 className="font-semibold text-sm">{t('props.netProperties')}</h3>
           <div className="space-y-2">
-            <Label className="text-xs">Name</Label>
+            <Label className="text-xs">{t('props.name')}</Label>
             <Input
               value={net.name}
               onChange={(e) => {
@@ -45,7 +47,7 @@ export function PropertiesPanel() {
             />
           </div>
           <div className="space-y-2">
-            <Label className="text-xs">Description</Label>
+            <Label className="text-xs">{t('props.description')}</Label>
             <Textarea
               value={net.description}
               onChange={(e) => {
@@ -57,15 +59,15 @@ export function PropertiesPanel() {
           <Separator />
           <div className="text-xs text-muted-foreground space-y-1">
             <div className="flex justify-between">
-              <span>Places</span>
+              <span>{t('props.places')}</span>
               <Badge variant="outline" className="text-xs h-5">{Object.keys(net.places).length}</Badge>
             </div>
             <div className="flex justify-between">
-              <span>Transitions</span>
+              <span>{t('props.transitions')}</span>
               <Badge variant="outline" className="text-xs h-5">{Object.keys(net.transitions).length}</Badge>
             </div>
             <div className="flex justify-between">
-              <span>Arcs</span>
+              <span>{t('props.arcs')}</span>
               <Badge variant="outline" className="text-xs h-5">{Object.keys(net.arcs).length}</Badge>
             </div>
           </div>
@@ -76,8 +78,8 @@ export function PropertiesPanel() {
 
   if (selectedIds.length > 1) {
     return (
-      <div className="hidden md:block w-60 border-l bg-card p-3">
-        <Badge variant="secondary">{selectedIds.length} selected</Badge>
+      <div data-tour="properties" className="hidden md:block w-60 border-l bg-card p-3">
+        <Badge variant="secondary">{selectedIds.length} {t('props.selected')}</Badge>
       </div>
     );
   }
@@ -90,14 +92,14 @@ export function PropertiesPanel() {
 
   if (place) {
     return (
-      <ScrollArea className="hidden md:block w-60 border-l bg-card">
+      <ScrollArea data-tour="properties" className="hidden md:block w-60 border-l bg-card">
         <div className="p-3 space-y-3">
           <div className="space-y-1">
-            <h3 className="font-semibold text-sm">Place</h3>
+            <h3 className="font-semibold text-sm">{t('props.place')}</h3>
             <p className="text-xs text-muted-foreground break-words">{place.label}</p>
           </div>
           <div className="space-y-2">
-            <Label className="text-xs">Label</Label>
+            <Label className="text-xs">{t('props.label')}</Label>
             <Input
               value={place.label}
               onChange={(e) => {
@@ -108,7 +110,7 @@ export function PropertiesPanel() {
             />
           </div>
           <div className="space-y-2">
-            <Label className="text-xs">Initial Tokens</Label>
+            <Label className="text-xs">{t('props.initialTokens')}</Label>
             <Input
               type="number"
               min={0}
@@ -121,7 +123,7 @@ export function PropertiesPanel() {
             />
           </div>
           <div className="space-y-2">
-            <Label className="text-xs">Capacity (0 = unlimited)</Label>
+            <Label className="text-xs">{t('props.capacity')}</Label>
             <Input
               type="number"
               min={0}
@@ -135,7 +137,7 @@ export function PropertiesPanel() {
           </div>
           <Separator />
           <div className="text-xs text-muted-foreground">
-            <p>Position: ({Math.round(place.position.x)}, {Math.round(place.position.y)})</p>
+            <p>{t('props.position')}: ({Math.round(place.position.x)}, {Math.round(place.position.y)})</p>
           </div>
         </div>
       </ScrollArea>
@@ -144,14 +146,14 @@ export function PropertiesPanel() {
 
   if (transition) {
     return (
-      <ScrollArea className="hidden md:block w-60 border-l bg-card">
+      <ScrollArea data-tour="properties" className="hidden md:block w-60 border-l bg-card">
         <div className="p-3 space-y-3">
           <div className="space-y-1">
-            <h3 className="font-semibold text-sm">Transition</h3>
+            <h3 className="font-semibold text-sm">{t('props.transition')}</h3>
             <p className="text-xs text-muted-foreground break-words">{transition.label}</p>
           </div>
           <div className="space-y-2">
-            <Label className="text-xs">Label</Label>
+            <Label className="text-xs">{t('props.label')}</Label>
             <Input
               value={transition.label}
               onChange={(e) => {
@@ -162,7 +164,7 @@ export function PropertiesPanel() {
             />
           </div>
           <div className="space-y-2">
-            <Label className="text-xs">Delay (ms)</Label>
+            <Label className="text-xs">{t('props.delay')}</Label>
             <Input
               type="number"
               min={0}
@@ -175,7 +177,7 @@ export function PropertiesPanel() {
             />
           </div>
           <div className="space-y-2">
-            <Label className="text-xs">Priority</Label>
+            <Label className="text-xs">{t('props.priority')}</Label>
             <Input
               type="number"
               min={0}
@@ -189,7 +191,7 @@ export function PropertiesPanel() {
           </div>
           <Separator />
           <div className="text-xs text-muted-foreground">
-            <p>Position: ({Math.round(transition.position.x)}, {Math.round(transition.position.y)})</p>
+            <p>{t('props.position')}: ({Math.round(transition.position.x)}, {Math.round(transition.position.y)})</p>
           </div>
         </div>
       </ScrollArea>
@@ -198,11 +200,11 @@ export function PropertiesPanel() {
 
   if (arc) {
     return (
-      <ScrollArea className="hidden md:block w-60 border-l bg-card">
+      <ScrollArea data-tour="properties" className="hidden md:block w-60 border-l bg-card">
         <div className="p-3 space-y-3">
-          <h3 className="font-semibold text-sm">Arc</h3>
+          <h3 className="font-semibold text-sm">{t('props.arc')}</h3>
           <div className="space-y-2">
-            <Label className="text-xs">Weight</Label>
+            <Label className="text-xs">{t('props.weight')}</Label>
             <Input
               type="number"
               min={1}
@@ -215,7 +217,7 @@ export function PropertiesPanel() {
             />
           </div>
           <div className="space-y-2">
-            <Label className="text-xs">Type</Label>
+            <Label className="text-xs">{t('props.type')}</Label>
             <Select
               value={arc.arcType}
               onValueChange={(value) => {
@@ -228,15 +230,15 @@ export function PropertiesPanel() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="normal">Normal</SelectItem>
-                <SelectItem value="inhibitor">Inhibitor</SelectItem>
-                <SelectItem value="read">Read</SelectItem>
+                <SelectItem value="normal">{t('props.type.normal')}</SelectItem>
+                <SelectItem value="inhibitor">{t('props.type.inhibitor')}</SelectItem>
+                <SelectItem value="read">{t('props.type.read')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <Separator />
           <div className="text-xs text-muted-foreground">
-            <p>Bend points: {arc.bendPoints.length}</p>
+            <p>{t('props.bendPoints')}: {arc.bendPoints.length}</p>
           </div>
         </div>
       </ScrollArea>
@@ -245,11 +247,11 @@ export function PropertiesPanel() {
 
   if (annotation) {
     return (
-      <ScrollArea className="hidden md:block w-60 border-l bg-card">
+      <ScrollArea data-tour="properties" className="hidden md:block w-60 border-l bg-card">
         <div className="p-3 space-y-3">
-          <h3 className="font-semibold text-sm">Text Annotation</h3>
+          <h3 className="font-semibold text-sm">{t('props.annotation')}</h3>
           <div className="space-y-2">
-            <Label className="text-xs">Text</Label>
+            <Label className="text-xs">{t('props.text')}</Label>
             <Textarea
               value={annotation.text || ''}
               onChange={(e) => {
@@ -257,12 +259,12 @@ export function PropertiesPanel() {
                 updateAnnotation(id, { text: e.target.value });
               }}
               className="text-sm min-h-[60px]"
-              placeholder="Enter annotation text..."
+              placeholder={t('props.textPlaceholder')}
             />
           </div>
           <Separator />
           <div className="text-xs text-muted-foreground">
-            <p>Position: ({Math.round(annotation.position.x)}, {Math.round(annotation.position.y)})</p>
+            <p>{t('props.position')}: ({Math.round(annotation.position.x)}, {Math.round(annotation.position.y)})</p>
           </div>
         </div>
       </ScrollArea>
@@ -270,8 +272,8 @@ export function PropertiesPanel() {
   }
 
   return (
-    <div className="hidden md:block w-60 border-l bg-card p-3">
-      <p className="text-sm text-muted-foreground">No properties available.</p>
+    <div data-tour="properties" className="hidden md:block w-60 border-l bg-card p-3">
+      <p className="text-sm text-muted-foreground">{t('props.noProperties')}</p>
     </div>
   );
 }

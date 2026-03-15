@@ -1,7 +1,10 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useStore } from '@/store/useStore';
+import { useTheme } from 'next-themes';
+import { useTranslation } from '@/lib/i18n';
+import type { Locale } from '@/lib/i18n';
 import { Canvas } from '@/components/canvas/Canvas';
 import { Toolbar } from '@/components/toolbar/Toolbar';
 import { PropertiesPanel } from '@/components/properties/PropertiesPanel';
@@ -14,21 +17,28 @@ import { ExportDialog } from '@/components/dialogs/ExportDialog';
 import { ShortcutsDialog } from '@/components/dialogs/ShortcutsDialog';
 import { HelpDialog } from '@/components/dialogs/HelpDialog';
 import { AnalysisPanel } from '@/components/analysis/AnalysisPanel';
+import { GuidedTour } from '@/components/tour/GuidedTour';
 import { Toaster } from '@/components/ui/sonner';
 import { Button } from '@/components/ui/button';
-import { FolderOpen, Play, Square, HelpCircle } from 'lucide-react';
+import { FolderOpen, Play, Square, HelpCircle, Compass, Sun, Moon } from 'lucide-react';
 import {
   deserializeAuto,
   readFileAsArrayBuffer,
 } from '@/lib/serialization';
 import { toast } from 'sonner';
 
+const TOUR_SEEN_KEY = 'hpsim-tour-seen';
+
 export function EditorLayout() {
+  const { t, locale, setLocale } = useTranslation();
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [samplesOpen, setSamplesOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [analysisOpen, setAnalysisOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
   const mobileFileRef = useRef<HTMLInputElement>(null);
 
   const net = useStore((s) => s.net);
@@ -42,12 +52,29 @@ export function EditorLayout() {
     && Object.keys(net.transitions).length === 0
     && Object.keys(net.annotations).length === 0;
 
+  useEffect(() => setMounted(true), []);
+
+  // Auto-show tour on first visit (desktop only)
+  useEffect(() => {
+    if (window.innerWidth < 768) return;
+    const seen = localStorage.getItem(TOUR_SEEN_KEY);
+    if (!seen) {
+      const timer = setTimeout(() => setTourOpen(true), 600);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const handleCloseTour = () => {
+    setTourOpen(false);
+    localStorage.setItem(TOUR_SEEN_KEY, '1');
+  };
+
   const handleMobileOpen = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const ext = file.name.split('.').pop()?.toLowerCase();
     if (ext !== 'hps' && ext !== 'json') {
-      toast.error(`Unsupported file type: .${ext}. Only .hps and .json files are supported.`);
+      toast.error(t('toast.unsupportedFile', { ext: ext || '' }));
       if (mobileFileRef.current) mobileFileRef.current.value = '';
       return;
     }
@@ -57,9 +84,9 @@ export function EditorLayout() {
       pushSnapshot();
       setNet(loadedNet);
       clearHistory();
-      toast.success(`Loaded "${loadedNet.name}"`);
+      toast.success(t('toast.loaded', { name: loadedNet.name }));
     } catch (err) {
-      toast.error('Failed to load: ' + (err instanceof Error ? err.message : 'Unknown error'));
+      toast.error(t('toast.loadFailed') + ': ' + (err instanceof Error ? err.message : 'Unknown error'));
     }
     if (mobileFileRef.current) mobileFileRef.current.value = '';
   };
@@ -67,14 +94,58 @@ export function EditorLayout() {
   return (
     <div className="h-dvh flex flex-col overflow-hidden">
       {/* Desktop menubar */}
-      <div className="hidden md:block">
-        <AppMenubar
-          onOpenSamples={() => setSamplesOpen(true)}
-          onOpenExport={() => setExportOpen(true)}
-          onOpenAnalysis={() => setAnalysisOpen(true)}
-          onOpenShortcuts={() => setShortcutsOpen(true)}
-          onOpenHelp={() => setHelpOpen(true)}
-        />
+      <div className="hidden md:flex items-center border-b bg-card" data-tour="menubar">
+        <div className="flex-1">
+          <AppMenubar
+            onOpenSamples={() => setSamplesOpen(true)}
+            onOpenExport={() => setExportOpen(true)}
+            onOpenAnalysis={() => setAnalysisOpen(true)}
+            onOpenShortcuts={() => setShortcutsOpen(true)}
+            onOpenHelp={() => setHelpOpen(true)}
+            onOpenTour={() => setTourOpen(true)}
+          />
+        </div>
+
+        {/* Right side: Tour + Theme + Language */}
+        <div className="flex items-center gap-1.5 px-2">
+          <button
+            type="button"
+            className="h-7 w-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+            onClick={() => setTourOpen(true)}
+            title="Tour"
+          >
+            <Compass className="w-3.5 h-3.5" />
+          </button>
+
+          <button
+            type="button"
+            className="h-7 w-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+            onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+          >
+            {mounted && resolvedTheme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+          </button>
+
+          <div className="flex items-center h-7 rounded-md border bg-muted/50 p-0.5">
+            <button
+              type="button"
+              className={`px-2 h-6 rounded-sm text-xs font-medium transition-colors ${
+                locale === 'en' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+              }`}
+              onClick={() => setLocale('en' as Locale)}
+            >
+              EN
+            </button>
+            <button
+              type="button"
+              className={`px-2 h-6 rounded-sm text-xs font-medium transition-colors ${
+                locale === 'es' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+              }`}
+              onClick={() => setLocale('es' as Locale)}
+            >
+              ES
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Mobile header */}
@@ -88,6 +159,37 @@ export function EditorLayout() {
           className="hidden"
           onChange={handleMobileOpen}
         />
+
+        {/* Theme + Language (mobile) */}
+        <button
+          type="button"
+          className="h-8 w-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+        >
+          {mounted && resolvedTheme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+        </button>
+
+        <div className="flex items-center h-7 rounded-md border bg-muted/50 p-0.5">
+          <button
+            type="button"
+            className={`px-1.5 h-6 rounded-sm text-[10px] font-medium transition-colors ${
+              locale === 'en' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'
+            }`}
+            onClick={() => setLocale('en' as Locale)}
+          >
+            EN
+          </button>
+          <button
+            type="button"
+            className={`px-1.5 h-6 rounded-sm text-[10px] font-medium transition-colors ${
+              locale === 'es' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'
+            }`}
+            onClick={() => setLocale('es' as Locale)}
+          >
+            ES
+          </button>
+        </div>
+
         <Button
           variant="outline"
           size="sm"
@@ -95,7 +197,7 @@ export function EditorLayout() {
           onClick={() => mobileFileRef.current?.click()}
         >
           <FolderOpen className="w-4 h-4" />
-          Open
+          {t('mobile.open')}
         </Button>
         {mode === 'edit' ? (
           <Button
@@ -106,7 +208,7 @@ export function EditorLayout() {
             disabled={isEmpty}
           >
             <Play className="w-4 h-4" />
-            Simulate
+            {t('mobile.simulate')}
           </Button>
         ) : (
           <Button
@@ -116,7 +218,7 @@ export function EditorLayout() {
             onClick={() => setMode('edit')}
           >
             <Square className="w-4 h-4" />
-            Stop
+            {t('mobile.stop')}
           </Button>
         )}
         <Button
@@ -135,7 +237,7 @@ export function EditorLayout() {
         <Toolbar onOpenHelp={() => setHelpOpen(true)} />
 
         {/* Center canvas */}
-        <div className="flex-1 relative min-w-0">
+        <div className="flex-1 relative min-w-0" data-tour="canvas">
           <Canvas />
           {isEmpty && <EmptyState />}
         </div>
@@ -148,7 +250,9 @@ export function EditorLayout() {
       <FiringLog />
 
       {/* Bottom simulation controls */}
-      <SimulationControls />
+      <div data-tour="simulation">
+        <SimulationControls />
+      </div>
 
       {/* Dialogs */}
       <SampleNetsDialog open={samplesOpen} onOpenChange={setSamplesOpen} />
@@ -156,6 +260,9 @@ export function EditorLayout() {
       <AnalysisPanel open={analysisOpen} onOpenChange={setAnalysisOpen} />
       <ShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
       <HelpDialog open={helpOpen} onOpenChange={setHelpOpen} />
+
+      {/* Guided Tour */}
+      <GuidedTour open={tourOpen} onClose={handleCloseTour} />
 
       {/* Toast notifications */}
       <Toaster position="bottom-right" />

@@ -58,20 +58,29 @@ const createEmptyNet = (): PetriNet => ({
   annotations: {},
 });
 
-let placeCounter = 0;
-let transitionCounter = 0;
+function nextAvailableLabel(prefix: string, existing: Record<string, { label: string }>): string {
+  const usedNumbers = new Set<number>();
+  const pattern = new RegExp(`^${prefix}(\\d+)$`);
+  for (const item of Object.values(existing)) {
+    const match = item.label.match(pattern);
+    if (match) usedNumbers.add(parseInt(match[1], 10));
+  }
+  let n = 1;
+  while (usedNumbers.has(n)) n++;
+  return `${prefix}${n}`;
+}
 
 export const createPetriNetSlice: StateCreator<StoreState, [['zustand/immer', never]], [], PetriNetSlice> = (set, get) => ({
   net: createEmptyNet(),
 
   addPlace: (position) => {
     const id = nanoid();
-    placeCounter++;
+    const label = nextAvailableLabel('P', get().net.places);
     set((state) => {
       state.net.places[id] = {
         id,
         type: 'place',
-        label: `P${placeCounter}`,
+        label,
         position: { ...position },
         tokens: DEFAULT_PLACE_TOKENS,
         capacity: DEFAULT_PLACE_CAPACITY,
@@ -101,12 +110,12 @@ export const createPetriNetSlice: StateCreator<StoreState, [['zustand/immer', ne
 
   addTransition: (position) => {
     const id = nanoid();
-    transitionCounter++;
+    const label = nextAvailableLabel('T', get().net.transitions);
     set((state) => {
       state.net.transitions[id] = {
         id,
         type: 'transition',
-        label: `T${transitionCounter}`,
+        label,
         position: { ...position },
         delay: DEFAULT_TRANSITION_DELAY,
         priority: DEFAULT_TRANSITION_PRIORITY,
@@ -280,16 +289,12 @@ export const createPetriNetSlice: StateCreator<StoreState, [['zustand/immer', ne
   },
 
   setNet: (net) => {
-    placeCounter = Object.keys(net.places).length;
-    transitionCounter = Object.keys(net.transitions).length;
     set((state) => {
       state.net = net;
     });
   },
 
   clearNet: () => {
-    placeCounter = 0;
-    transitionCounter = 0;
     set((state) => {
       state.net = createEmptyNet();
     });

@@ -2,9 +2,11 @@
 
 import { useRef, useState, useCallback } from 'react';
 import { useStore } from '@/store/useStore';
+import { useTranslation } from '@/lib/i18n';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 export function FiringLog() {
+  const { t } = useTranslation();
   const firingLog = useStore((s) => s.firingLog);
   const mode = useStore((s) => s.mode);
   const [height, setHeight] = useState(128);
@@ -47,7 +49,7 @@ export function FiringLog() {
       </div>
 
       <div className="flex items-center px-3 py-1 border-b">
-        <span className="text-xs font-semibold">Firing Log</span>
+        <span className="text-xs font-semibold">{t('firingLog.title')}</span>
         <span className="text-xs text-muted-foreground ml-2">({firingLog.length} firings)</span>
       </div>
       <ScrollArea style={{ height }}>

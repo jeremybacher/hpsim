@@ -162,7 +162,14 @@ class BinaryReader {
       );
     }
     const bytes = this.readBytes(length);
-    return new TextDecoder('latin1').decode(bytes);
+    // Try UTF-8 first (handles files saved with UTF-8 encoded strings),
+    // fall back to Windows-1252 for legacy HOldPetriSim files
+    try {
+      const decoded = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+      return decoded;
+    } catch {
+      return new TextDecoder('windows-1252').decode(bytes);
+    }
   }
 
   /** Read MFC CArray<CPoint> */

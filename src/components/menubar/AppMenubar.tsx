@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import { useStore } from '@/store/useStore';
 import { useTheme } from 'next-themes';
+import { useTranslation } from '@/lib/i18n';
 import {
   Menubar,
   MenubarContent,
@@ -42,9 +43,11 @@ interface AppMenubarProps {
   onOpenAnalysis: () => void;
   onOpenShortcuts: () => void;
   onOpenHelp: () => void;
+  onOpenTour: () => void;
 }
 
-export function AppMenubar({ onOpenSamples, onOpenExport, onOpenAnalysis, onOpenShortcuts, onOpenHelp }: AppMenubarProps) {
+export function AppMenubar({ onOpenSamples, onOpenExport, onOpenAnalysis, onOpenShortcuts, onOpenHelp, onOpenTour }: AppMenubarProps) {
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [confirmNewOpen, setConfirmNewOpen] = useState(false);
   const { theme, setTheme } = useTheme();
@@ -81,14 +84,14 @@ export function AppMenubar({ onOpenSamples, onOpenExport, onOpenAnalysis, onOpen
   const doNew = () => {
     clearNet();
     clearHistory();
-    toast.success('New net created');
+    toast.success(t('toast.newNet'));
   };
 
   const handleSaveJSON = () => {
     const json = serializeJSON(net);
     const filename = (net.name || 'untitled').replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.hps';
     downloadFile(json, filename);
-    toast.success(`Saved as ${filename} (JSON)`);
+    toast.success(t('toast.saved', { filename }));
   };
 
   const handleSaveBinaryHps = () => {
@@ -96,9 +99,9 @@ export function AppMenubar({ onOpenSamples, onOpenExport, onOpenAnalysis, onOpen
       const buffer = serializeBinaryHps(net);
       const filename = (net.name || 'untitled').replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.hps';
       downloadBinaryFile(buffer, filename);
-      toast.success(`Exported as ${filename} (HPSim binary)`);
+      toast.success(t('toast.exported', { filename }));
     } catch (err) {
-      toast.error('Export failed: ' + (err instanceof Error ? err.message : 'Unknown error'));
+      toast.error(t('toast.exportFailed') + ': ' + (err instanceof Error ? err.message : 'Unknown error'));
     }
   };
 
@@ -107,7 +110,7 @@ export function AppMenubar({ onOpenSamples, onOpenExport, onOpenAnalysis, onOpen
     if (!file) return;
     const ext = file.name.split('.').pop()?.toLowerCase();
     if (ext !== 'hps' && ext !== 'json') {
-      toast.error(`Unsupported file type: .${ext}. Only .hps and .json files are supported.`);
+      toast.error(t('toast.unsupportedFile', { ext: ext || '' }));
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
@@ -117,9 +120,9 @@ export function AppMenubar({ onOpenSamples, onOpenExport, onOpenAnalysis, onOpen
       pushSnapshot();
       setNet(loadedNet);
       clearHistory();
-      toast.success(`Loaded "${loadedNet.name}" from ${file.name}`);
+      toast.success(t('toast.loadedFrom', { name: loadedNet.name, file: file.name }));
     } catch (err) {
-      toast.error('Failed to load file: ' + (err instanceof Error ? err.message : 'Unknown error'));
+      toast.error(t('toast.loadFailed') + ': ' + (err instanceof Error ? err.message : 'Unknown error'));
     }
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -146,127 +149,130 @@ export function AppMenubar({ onOpenSamples, onOpenExport, onOpenAnalysis, onOpen
       <AlertDialog open={confirmNewOpen} onOpenChange={setConfirmNewOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Create new net?</AlertDialogTitle>
+            <AlertDialogTitle>{t('confirm.newNet.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will clear the current net. Unsaved changes will be lost.
+              {t('confirm.newNet.desc')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('confirm.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={() => { doNew(); setConfirmNewOpen(false); }}>
-              Create New
+              {t('confirm.createNew')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      <Menubar className="border-b rounded-none px-2 h-9">
+      <Menubar className="border-none rounded-none px-2 h-9 shadow-none">
         <div className="flex items-center gap-1.5 mr-2 pr-2 border-r">
           <img src="/logo.svg" alt="HPSim" className="w-4 h-4 dark:invert" />
           <span className="text-sm font-semibold">HPSim</span>
         </div>
         <MenubarMenu>
-          <MenubarTrigger className="text-sm py-1">File</MenubarTrigger>
+          <MenubarTrigger className="text-sm py-1">{t('menu.file')}</MenubarTrigger>
           <MenubarContent>
             <MenubarItem onClick={handleNew}>
-              New <MenubarShortcut>Ctrl+N</MenubarShortcut>
+              {t('menu.file.new')} <MenubarShortcut>Ctrl+N</MenubarShortcut>
             </MenubarItem>
             <MenubarItem onClick={() => fileInputRef.current?.click()}>
-              Open... <MenubarShortcut>Ctrl+O</MenubarShortcut>
+              {t('menu.file.open')} <MenubarShortcut>Ctrl+O</MenubarShortcut>
             </MenubarItem>
 
             <MenubarSub>
-              <MenubarSubTrigger>Save As...</MenubarSubTrigger>
+              <MenubarSubTrigger>{t('menu.file.saveAs')}</MenubarSubTrigger>
               <MenubarSubContent>
                 <MenubarItem onClick={handleSaveJSON}>
-                  HPSim JSON (.hps)
+                  {t('menu.file.saveJson')}
                 </MenubarItem>
                 <MenubarItem onClick={handleSaveBinaryHps}>
-                  HPSim Binary (.hps)
+                  {t('menu.file.saveBinary')}
                 </MenubarItem>
               </MenubarSubContent>
             </MenubarSub>
 
             <MenubarSeparator />
-            <MenubarItem onClick={onOpenExport}>Export Image...</MenubarItem>
+            <MenubarItem onClick={onOpenExport}>{t('menu.file.exportImage')}</MenubarItem>
             <MenubarSeparator />
-            <MenubarItem onClick={onOpenSamples}>Sample Nets...</MenubarItem>
+            <MenubarItem onClick={onOpenSamples}>{t('menu.file.sampleNets')}</MenubarItem>
           </MenubarContent>
         </MenubarMenu>
 
         <MenubarMenu>
-          <MenubarTrigger className="text-sm py-1">Edit</MenubarTrigger>
+          <MenubarTrigger className="text-sm py-1">{t('menu.edit')}</MenubarTrigger>
           <MenubarContent>
             <MenubarItem onClick={undo} disabled={mode !== 'edit'}>
-              Undo <MenubarShortcut>Ctrl+Z</MenubarShortcut>
+              {t('menu.edit.undo')} <MenubarShortcut>Ctrl+Z</MenubarShortcut>
             </MenubarItem>
             <MenubarItem onClick={redo} disabled={mode !== 'edit'}>
-              Redo <MenubarShortcut>Ctrl+Y</MenubarShortcut>
+              {t('menu.edit.redo')} <MenubarShortcut>Ctrl+Y</MenubarShortcut>
             </MenubarItem>
             <MenubarSeparator />
             <MenubarItem onClick={selectAll} disabled={mode !== 'edit'}>
-              Select All <MenubarShortcut>Ctrl+A</MenubarShortcut>
+              {t('menu.edit.selectAll')} <MenubarShortcut>Ctrl+A</MenubarShortcut>
             </MenubarItem>
             <MenubarItem onClick={handleDelete} disabled={mode !== 'edit' || selectedIds.length === 0}>
-              Delete <MenubarShortcut>Del</MenubarShortcut>
+              {t('menu.edit.delete')} <MenubarShortcut>Del</MenubarShortcut>
             </MenubarItem>
           </MenubarContent>
         </MenubarMenu>
 
         <MenubarMenu>
-          <MenubarTrigger className="text-sm py-1">View</MenubarTrigger>
+          <MenubarTrigger className="text-sm py-1">{t('menu.view')}</MenubarTrigger>
           <MenubarContent>
             <MenubarCheckboxItem checked={showGrid} onCheckedChange={setShowGrid}>
-              Show Grid
+              {t('menu.view.showGrid')}
             </MenubarCheckboxItem>
             <MenubarCheckboxItem checked={snapToGrid} onCheckedChange={setSnapToGrid}>
-              Snap to Grid
+              {t('menu.view.snapToGrid')}
             </MenubarCheckboxItem>
             <MenubarSeparator />
-            <MenubarItem onClick={resetView}>Reset Zoom</MenubarItem>
+            <MenubarItem onClick={resetView}>{t('menu.view.resetZoom')}</MenubarItem>
             <MenubarSeparator />
             <MenubarCheckboxItem
               checked={theme === 'dark'}
               onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
             >
-              Dark Mode
+              {t('menu.view.darkMode')}
             </MenubarCheckboxItem>
           </MenubarContent>
         </MenubarMenu>
 
         <MenubarMenu>
-          <MenubarTrigger className="text-sm py-1">Simulation</MenubarTrigger>
+          <MenubarTrigger className="text-sm py-1">{t('menu.simulation')}</MenubarTrigger>
           <MenubarContent>
             <MenubarItem
               onClick={() => setMode(mode === 'edit' ? 'token-game' : 'edit')}
             >
-              {mode === 'edit' ? 'Start Token Game' : 'Stop Simulation'}
+              {mode === 'edit' ? t('menu.simulation.startTokenGame') : t('menu.simulation.stopSimulation')}
             </MenubarItem>
             <MenubarItem
               onClick={() => setMode(mode === 'edit' ? 'fast-simulation' : 'edit')}
               disabled={mode === 'token-game'}
             >
-              Fast Simulation
+              {t('menu.simulation.fastSimulation')}
             </MenubarItem>
             <MenubarSeparator />
             <MenubarItem onClick={onOpenAnalysis} disabled={mode === 'edit'}>
-              Analysis...
+              {t('menu.simulation.analysis')}
             </MenubarItem>
           </MenubarContent>
         </MenubarMenu>
 
         <MenubarMenu>
-          <MenubarTrigger className="text-sm py-1">Help</MenubarTrigger>
+          <MenubarTrigger className="text-sm py-1">{t('menu.help')}</MenubarTrigger>
           <MenubarContent>
             <MenubarItem onClick={onOpenHelp}>
-              How It Works
+              {t('menu.help.howItWorks')}
             </MenubarItem>
             <MenubarItem onClick={onOpenShortcuts}>
-              Keyboard Shortcuts
+              {t('menu.help.shortcuts')}
+            </MenubarItem>
+            <MenubarItem onClick={onOpenTour}>
+              {t('menu.help.guidedTour')}
             </MenubarItem>
             <MenubarSeparator />
             <MenubarItem disabled>
-              HPSim v1.0
+              {t('app.version')}
             </MenubarItem>
           </MenubarContent>
         </MenubarMenu>

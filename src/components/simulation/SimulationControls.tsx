@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useEffect } from 'react';
 import { useStore } from '@/store/useStore';
+import { useTranslation } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
@@ -17,9 +18,9 @@ import {
 } from 'lucide-react';
 import { getEnabledTransitions, fireTransition, getMarkingFromNet } from '@/engine/simulation';
 import { selectTransition } from '@/engine/conflictResolution';
-import type { FiringRecord } from '@/types/simulation';
 
 export function SimulationControls() {
+  const { t } = useTranslation();
   const mode = useStore((s) => s.mode);
   const isRunning = useStore((s) => s.isRunning);
   const speed = useStore((s) => s.speed);
@@ -37,7 +38,6 @@ export function SimulationControls() {
   const animFrameRef = useRef<number>(0);
   const lastFireTimeRef = useRef(0);
 
-  // Fire a single transition (for token game and step)
   const fireOne = useCallback(() => {
     const state = useStore.getState();
     const net = state.net;
@@ -68,7 +68,6 @@ export function SimulationControls() {
     state.pushMarking(newMarking);
     state.addReachabilityMarking(newMarking);
 
-    // Update enabled transitions
     const newEnabled = getEnabledTransitions(net, newMarking);
     state.setEnabledTransitions(newEnabled);
     if (newEnabled.length === 0) {
@@ -77,7 +76,6 @@ export function SimulationControls() {
     }
   }, []);
 
-  // Auto-run simulation loop
   useEffect(() => {
     if (!isRunning || mode !== 'fast-simulation') return;
 
@@ -93,7 +91,6 @@ export function SimulationControls() {
       }
 
       if (timestamp - lastFireTimeRef.current >= interval) {
-        // At high speeds, fire multiple per frame
         const firingsPerFrame = speed > 100 ? Math.min(Math.floor(speed / 60), 50) : 1;
         for (let i = 0; i < firingsPerFrame; i++) {
           if (!useStore.getState().isRunning) break;
@@ -116,7 +113,6 @@ export function SimulationControls() {
     };
   }, [isRunning, mode, speed, fireOne]);
 
-  // Update enabled transitions when entering token game
   useEffect(() => {
     if (mode === 'token-game' || mode === 'fast-simulation') {
       const state = useStore.getState();
@@ -126,7 +122,6 @@ export function SimulationControls() {
     }
   }, [mode]);
 
-  // Expose fire handler for token game (click-to-fire)
   useEffect(() => {
     useStore.setState({ fireTransitionHandler: (transitionId: string) => {
       const state = useStore.getState();
@@ -165,7 +160,7 @@ export function SimulationControls() {
           className="gap-1"
         >
           <StepForward className="w-4 h-4" />
-          Token Game
+          {t('sim.tokenGame')}
         </Button>
         <Button
           variant="outline"
@@ -174,7 +169,7 @@ export function SimulationControls() {
           className="gap-1"
         >
           <Zap className="w-4 h-4" />
-          Fast Simulation
+          {t('sim.fastSimulation')}
         </Button>
       </div>
     );
@@ -192,11 +187,11 @@ export function SimulationControls() {
             className="gap-1"
           >
             <StepForward className="w-4 h-4" />
-            Step
+            {t('sim.step')}
           </Button>
           <Button variant="outline" size="sm" onClick={stepBack} className="gap-1">
             <SkipBack className="w-4 h-4" />
-            Back
+            {t('sim.back')}
           </Button>
         </>
       )}
@@ -212,7 +207,7 @@ export function SimulationControls() {
               className="gap-1"
             >
               <Play className="w-4 h-4" />
-              Play
+              {t('sim.play')}
             </Button>
           ) : (
             <Button
@@ -222,12 +217,12 @@ export function SimulationControls() {
               className="gap-1"
             >
               <Pause className="w-4 h-4" />
-              Pause
+              {t('sim.pause')}
             </Button>
           )}
 
           <div className="flex items-center gap-2 min-w-[140px] md:min-w-[200px]">
-            <span className="text-xs text-muted-foreground whitespace-nowrap">Speed:</span>
+            <span className="text-xs text-muted-foreground whitespace-nowrap">{t('sim.speed')}</span>
             <Slider
               value={[speed]}
               onValueChange={(v) => setSpeed(Array.isArray(v) ? v[0] : v)}
@@ -243,15 +238,15 @@ export function SimulationControls() {
 
       <Button variant="outline" size="sm" onClick={resetSimulation} className="gap-1">
         <RotateCcw className="w-4 h-4" />
-        Reset
+        {t('sim.reset')}
       </Button>
 
       <Separator orientation="vertical" className="h-6" />
 
-      <Badge variant="secondary" className="text-xs">Step: {currentStep}</Badge>
+      <Badge variant="secondary" className="text-xs">{t('sim.stepCount')}: {currentStep}</Badge>
 
       {deadlocked && (
-        <Badge variant="destructive" className="text-xs">Deadlocked</Badge>
+        <Badge variant="destructive" className="text-xs">{t('sim.deadlocked')}</Badge>
       )}
 
       <div className="ml-auto">
@@ -261,7 +256,7 @@ export function SimulationControls() {
           onClick={() => setMode('edit')}
         >
           <Square className="w-4 h-4 mr-1" />
-          Exit Simulation
+          {t('sim.exitSimulation')}
         </Button>
       </div>
     </div>
