@@ -59,7 +59,7 @@ export function EditorLayout() {
   };
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
+    <div className="h-dvh flex flex-col overflow-hidden">
       {/* Desktop menubar */}
       <div className="hidden md:block">
         <AppMenubar
