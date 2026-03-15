@@ -20,6 +20,7 @@ export function Canvas() {
   const dragStartRef = useRef<{ x: number; y: number; ids: string[] } | null>(null);
   const selectionStartRef = useRef<{ x: number; y: number } | null>(null);
   const spaceHeldRef = useRef(false);
+  const touchStartRef = useRef<{ touches: Array<{ x: number; y: number }>; transform: { x: number; y: number; zoom: number } } | null>(null);
 
   const net = useStore((s) => s.net);
   const tool = useStore((s) => s.tool);
@@ -425,6 +426,69 @@ export function Canvas() {
     }
   }, [mode, getWorldPos, findElementAtPoint]);
 
+  // Touch handlers for mobile pan/zoom
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length >= 1) {
+      e.preventDefault();
+      const touches = Array.from(e.touches).map((t) => ({ x: t.clientX, y: t.clientY }));
+      touchStartRef.current = {
+        touches,
+        transform: { ...viewTransform },
+      };
+    }
+  }, [viewTransform]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!touchStartRef.current) return;
+    e.preventDefault();
+
+    const startData = touchStartRef.current;
+
+    if (e.touches.length === 1 && startData.touches.length === 1) {
+      // Single finger: pan
+      const dx = e.touches[0].clientX - startData.touches[0].x;
+      const dy = e.touches[0].clientY - startData.touches[0].y;
+      setViewTransform({
+        x: startData.transform.x + dx,
+        y: startData.transform.y + dy,
+      });
+    } else if (e.touches.length === 2 && startData.touches.length >= 2) {
+      // Two fingers: pinch to zoom + pan
+      const startDist = Math.hypot(
+        startData.touches[1].x - startData.touches[0].x,
+        startData.touches[1].y - startData.touches[0].y,
+      );
+      const curDist = Math.hypot(
+        e.touches[1].clientX - e.touches[0].clientX,
+        e.touches[1].clientY - e.touches[0].clientY,
+      );
+
+      if (startDist > 0) {
+        const scale = curDist / startDist;
+        const newZoom = Math.max(0.1, Math.min(5, startData.transform.zoom * scale));
+
+        // Zoom around the midpoint of the two fingers
+        const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        const startMidX = (startData.touches[0].x + startData.touches[1].x) / 2;
+        const startMidY = (startData.touches[0].y + startData.touches[1].y) / 2;
+
+        const panDx = midX - startMidX;
+        const panDy = midY - startMidY;
+
+        const zoomRatio = newZoom / startData.transform.zoom;
+        const newX = midX - (startMidX - startData.transform.x) * zoomRatio + panDx - (midX - startMidX);
+        const newY = midY - (startMidY - startData.transform.y) * zoomRatio + panDy - (midY - startMidY);
+
+        setViewTransform({ x: newX, y: newY, zoom: newZoom });
+      }
+    }
+  }, [setViewTransform]);
+
+  const handleTouchEnd = useCallback(() => {
+    touchStartRef.current = null;
+  }, []);
+
   // Get source position for arc drawing ghost
   const arcSourcePos = arcDrawing ? (
     net.places[arcDrawing.sourceId]?.position ||
@@ -435,13 +499,20 @@ export function Canvas() {
     <svg
       ref={svgRef}
       className="w-full h-full bg-background"
-      style={{ cursor: isPanningRef.current || spaceHeldRef.current ? 'grab' : undefined }}
+      style={{
+        cursor: isPanningRef.current || spaceHeldRef.current ? 'grab' : undefined,
+        touchAction: 'none',
+      }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
       onWheel={handleWheel}
       onDoubleClick={handleDoubleClick}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
       onContextMenu={(e) => e.preventDefault()}
     >
       <SvgDefs />
