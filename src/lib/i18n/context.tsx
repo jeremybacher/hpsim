@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import { translations, type Locale, type TranslationKey } from './translations';
 
 interface I18nContextValue {
@@ -13,8 +13,7 @@ const I18nContext = createContext<I18nContextValue | null>(null);
 
 const STORAGE_KEY = 'hpsim-locale';
 
-function getInitialLocale(): Locale {
-  if (typeof window === 'undefined') return 'en';
+function getClientLocale(): Locale {
   const stored = localStorage.getItem(STORAGE_KEY);
   if (stored === 'en' || stored === 'es') return stored;
   const browserLang = navigator.language.slice(0, 2);
@@ -22,7 +21,15 @@ function getInitialLocale(): Locale {
 }
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(getInitialLocale);
+  const [locale, setLocaleState] = useState<Locale>('en');
+
+  useEffect(() => {
+    const clientLocale = getClientLocale();
+    if (clientLocale !== 'en') {
+      setLocaleState(clientLocale);
+      document.documentElement.lang = clientLocale;
+    }
+  }, []);
 
   const setLocale = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale);

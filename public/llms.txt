@@ -1,0 +1,28 @@
+# HPSim
+
+> A browser-based Petri Net editor and simulator inspired by the desktop app HPSim/HOldPetriSim. Runs entirely client-side.
+
+## Overview
+
+HPSim lets you create, edit, and simulate Petri Nets in the browser. It supports:
+
+- **Visual editing**: Place, transition, and arc creation on an SVG canvas with drag-and-drop
+- **Token game**: Step-by-step simulation where you click enabled transitions to fire
+- **Fast simulation**: Automated simulation with configurable speed (1-1000 firings/sec), priority-based conflict resolution, and deadlock detection
+- **Analysis**: Statistics, reachability analysis, and CSV export
+- **File compatibility**: Import/export `.hps` files in both JSON and the binary MFC CArchive format used by the original HOldPetriSim desktop app
+
+## Petri Net Model
+
+- **Place**: Circle node that holds tokens, with optional capacity
+- **Transition**: Rectangle node that fires when all input places have sufficient tokens. Has delay and priority properties.
+- **Arc**: Connects places to transitions (or vice versa). Types: normal, inhibitor, and read arcs.
+- **Marking**: The state of all places (token counts) at a point in time.
+
+## Sample Nets
+
+Five prebuilt examples are available: Simple Sequence, Producer-Consumer, Mutual Exclusion, Dining Philosophers, and Reader-Writer.
+
+## Tech Stack
+
+Next.js + React + TypeScript + Tailwind CSS + shadcn/ui + Zustand/Immer. All rendering is SVG-based. The simulation engine is pure TypeScript with zero UI dependencies.

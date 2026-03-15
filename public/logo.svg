@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
   <!-- Place (circle) -->
-  <circle cx="8" cy="16" r="6" stroke="currentColor" stroke-width="2" fill="none"/>
-  <circle cx="8" cy="16" r="2" fill="currentColor"/>
+  <circle cx="8" cy="16" r="6" stroke="#000" stroke-width="2" fill="none"/>
+  <circle cx="8" cy="16" r="2" fill="#000"/>
   <!-- Arrow -->
-  <line x1="14" y1="16" x2="18" y2="16" stroke="currentColor" stroke-width="1.5"/>
-  <polyline points="17,14 19,16 17,18" stroke="currentColor" stroke-width="1.5" fill="none"/>
+  <line x1="14" y1="16" x2="18" y2="16" stroke="#000" stroke-width="1.5"/>
+  <polyline points="17,14 19,16 17,18" stroke="#000" stroke-width="1.5" fill="none"/>
   <!-- Transition (bar) -->
-  <rect x="20" y="10" width="4" height="12" rx="1" fill="currentColor"/>
+  <rect x="20" y="10" width="4" height="12" rx="1" fill="#000"/>
 </svg>
