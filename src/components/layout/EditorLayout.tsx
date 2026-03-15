@@ -45,6 +45,12 @@ export function EditorLayout() {
   const handleMobileOpen = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    if (ext !== 'hps' && ext !== 'json') {
+      toast.error(`Unsupported file type: .${ext}. Only .hps and .json files are supported.`);
+      if (mobileFileRef.current) mobileFileRef.current.value = '';
+      return;
+    }
     try {
       const buffer = await readFileAsArrayBuffer(file);
       const loadedNet = deserializeAuto(buffer);
@@ -73,9 +79,8 @@ export function EditorLayout() {
 
       {/* Mobile header */}
       <div className="flex md:hidden items-center gap-2 px-3 py-2 border-b bg-card">
-        <span className="text-sm font-semibold truncate flex-1">
-          {net.name || 'HPSim'}
-        </span>
+        <img src="/logo.svg" alt="HPSim" className="w-5 h-5 dark:invert" />
+        <span className="text-sm font-semibold truncate flex-1">HPSim</span>
         <input
           ref={mobileFileRef}
           type="file"

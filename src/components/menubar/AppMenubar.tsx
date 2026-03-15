@@ -105,6 +105,12 @@ export function AppMenubar({ onOpenSamples, onOpenExport, onOpenAnalysis, onOpen
   const handleOpen = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    if (ext !== 'hps' && ext !== 'json') {
+      toast.error(`Unsupported file type: .${ext}. Only .hps and .json files are supported.`);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
     try {
       const buffer = await readFileAsArrayBuffer(file);
       const loadedNet = deserializeAuto(buffer);
@@ -155,6 +161,10 @@ export function AppMenubar({ onOpenSamples, onOpenExport, onOpenAnalysis, onOpen
       </AlertDialog>
 
       <Menubar className="border-b rounded-none px-2 h-9">
+        <div className="flex items-center gap-1.5 mr-2 pr-2 border-r">
+          <img src="/logo.svg" alt="HPSim" className="w-4 h-4 dark:invert" />
+          <span className="text-sm font-semibold">HPSim</span>
+        </div>
         <MenubarMenu>
           <MenubarTrigger className="text-sm py-1">File</MenubarTrigger>
           <MenubarContent>

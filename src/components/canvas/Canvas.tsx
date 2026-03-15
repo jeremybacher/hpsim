@@ -243,12 +243,14 @@ export function Canvas() {
 
     // Dragging elements
     if (dragStartRef.current) {
-      const dx = worldPos.x - dragStartRef.current.x;
-      const dy = worldPos.y - dragStartRef.current.y;
-      if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+      const snapped = snapPosition(worldPos);
+      const anchor = snapPosition({ x: dragStartRef.current.x, y: dragStartRef.current.y });
+      const dx = snapped.x - anchor.x;
+      const dy = snapped.y - anchor.y;
+      if (Math.abs(dx) > 0 || Math.abs(dy) > 0) {
         moveElements(dragStartRef.current.ids, { x: dx, y: dy });
-        dragStartRef.current.x = worldPos.x;
-        dragStartRef.current.y = worldPos.y;
+        dragStartRef.current.x = snapped.x;
+        dragStartRef.current.y = snapped.y;
       }
       return;
     }

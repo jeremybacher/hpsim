@@ -5,7 +5,10 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "HPSim - Petri Net Editor & Simulator",
-  description: "Browser-based Petri Net editor and simulator",
+  description: "Web-based Petri net editor and simulator with HOldPetriSim .hps file compatibility",
+  icons: {
+    icon: "/logo.svg",
+  },
 };
 
 export default function RootLayout({
