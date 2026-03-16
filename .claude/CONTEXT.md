@@ -69,14 +69,11 @@ src/
 - **Simulation engine is pure**: `src/engine/` has zero React imports. Functions take `(net, marking)` and return results. Fully testable.
 - **Binary .hps compatibility**: Can import/export the MFC CArchive binary format used by the original HPSim desktop app. Auto-detects format on open.
 
-### .hps File Formats
+### .hps File Format
 
-Two formats share the `.hps` extension:
+Binary format (HOldPetriSim compat): MFC CArchive serialization with class tags, little-endian. Places start at ID 1,000,000, arcs at 2,000,000.
 
-1. **JSON format** (our native): `{ version, type: "hpsim", net: { places, transitions, arcs, annotations } }`
-2. **Binary format** (HOldPetriSim compat): MFC CArchive serialization with class tags, little-endian. Places start at ID 1,000,000, arcs at 2,000,000.
-
-`deserializeAuto()` in `serialization.ts` detects which format a file is by checking if the first non-whitespace byte is `{` (JSON) or not (binary).
+`deserializeAuto()` in `serialization.ts` parses binary `.hps` files. Canvas state is auto-saved to localStorage.
 
 ### Petri Net Model
 

@@ -89,12 +89,12 @@ export function SampleNetsDialog({ open, onOpenChange }: SampleNetsDialogProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{t('samples.title')}</DialogTitle>
         </DialogHeader>
         <ScrollArea className="max-h-[60vh]">
-          <div className="space-y-2 pr-4">
+          <div className="space-y-2">
             {sampleNets.map((sample) => (
               <Button
                 key={sample.filename}

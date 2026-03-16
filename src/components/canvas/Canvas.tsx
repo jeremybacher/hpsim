@@ -12,7 +12,7 @@ import { SelectionBox } from './SelectionBox';
 import { GhostArc } from './GhostArc';
 import { useCanvasTooltip, CanvasTooltipOverlay } from './CanvasTooltip';
 import { screenToWorld, isCircleInRect, isRectInRect } from '@/lib/geometry';
-import { ZOOM_STEP, PLACE_RADIUS, TRANSITION_WIDTH, TRANSITION_HEIGHT } from '@/lib/constants';
+import { PLACE_RADIUS, TRANSITION_WIDTH, TRANSITION_HEIGHT } from '@/lib/constants';
 
 export function Canvas() {
   const svgRef = useRef<SVGSVGElement>(null);
@@ -22,6 +22,7 @@ export function Canvas() {
   const selectionStartRef = useRef<{ x: number; y: number } | null>(null);
   const spaceHeldRef = useRef(false);
   const touchStartRef = useRef<{ touches: Array<{ x: number; y: number }>; transform: { x: number; y: number; zoom: number } } | null>(null);
+  const groupRef = useRef<SVGGElement>(null);
 
   const net = useStore((s) => s.net);
   const tool = useStore((s) => s.tool);
@@ -40,7 +41,6 @@ export function Canvas() {
   const setSelectionBox = useStore((s) => s.setSelectionBox);
   const setArcDrawing = useStore((s) => s.setArcDrawing);
   const setViewTransform = useStore((s) => s.setViewTransform);
-  const zoomToPoint = useStore((s) => s.zoomToPoint);
   const setIsPanning = useStore((s) => s.setIsPanning);
   const snapPosition = useStore((s) => s.snapPosition);
 
@@ -322,11 +322,35 @@ export function Canvas() {
     }
   }, [selectionBox, net.places, net.transitions, setIsPanning, setSelectedIds, setSelectionBox]);
 
-  const handleWheel = useCallback((e: React.WheelEvent) => {
-    e.preventDefault();
-    const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
-    zoomToPoint(delta, { x: e.clientX, y: e.clientY });
-  }, [zoomToPoint]);
+
+  // Attach wheel handler natively with { passive: false } so preventDefault works,
+  // and block browser-level zoom (Ctrl+wheel, Safari gestures)
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const factor = 1 - e.deltaY * 0.002;
+      const vt = useStore.getState().viewTransform;
+      const newZoom = Math.max(0.1, Math.min(5, vt.zoom * factor));
+      const delta = newZoom - vt.zoom;
+      if (delta !== 0) {
+        useStore.getState().zoomToPoint(delta, { x: e.clientX, y: e.clientY });
+      }
+    };
+
+    svg.addEventListener('wheel', onWheel, { passive: false });
+
+    const blockGesture = (e: Event) => e.preventDefault();
+    document.addEventListener('gesturestart', blockGesture);
+    document.addEventListener('gesturechange', blockGesture);
+    return () => {
+      svg.removeEventListener('wheel', onWheel);
+      document.removeEventListener('gesturestart', blockGesture);
+      document.removeEventListener('gesturechange', blockGesture);
+    };
+  }, []);
 
   // Keyboard handlers
   useEffect(() => {
@@ -451,37 +475,44 @@ export function Canvas() {
     }
   }, [mode, getWorldPos, findElementAtPoint]);
 
-  // Touch handlers for mobile pan/zoom
+  // Touch handlers — manipulate DOM directly during gesture for smooth 60fps,
+  // then sync to React state on touch end.
+  const touchTransformRef = useRef<{ x: number; y: number; zoom: number } | null>(null);
+
+  const applyDomTransform = useCallback((x: number, y: number, zoom: number) => {
+    if (groupRef.current) {
+      groupRef.current.setAttribute('transform', `translate(${x}, ${y}) scale(${zoom})`);
+    }
+    touchTransformRef.current = { x, y, zoom };
+  }, []);
+
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (e.touches.length >= 1) {
       e.preventDefault();
       const touches = Array.from(e.touches).map((t) => ({ x: t.clientX, y: t.clientY }));
+      const vt = useStore.getState().viewTransform;
       touchStartRef.current = {
         touches,
-        transform: { ...viewTransform },
+        transform: { x: vt.x, y: vt.y, zoom: vt.zoom },
       };
+      touchTransformRef.current = null;
     }
-  }, [viewTransform]);
+  }, []);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (!touchStartRef.current) return;
     e.preventDefault();
 
-    const startData = touchStartRef.current;
+    const sd = touchStartRef.current;
 
-    if (e.touches.length === 1 && startData.touches.length === 1) {
-      // Single finger: pan
-      const dx = e.touches[0].clientX - startData.touches[0].x;
-      const dy = e.touches[0].clientY - startData.touches[0].y;
-      setViewTransform({
-        x: startData.transform.x + dx,
-        y: startData.transform.y + dy,
-      });
-    } else if (e.touches.length === 2 && startData.touches.length >= 2) {
-      // Two fingers: pinch to zoom + pan
+    if (e.touches.length === 1 && sd.touches.length === 1) {
+      const dx = e.touches[0].clientX - sd.touches[0].x;
+      const dy = e.touches[0].clientY - sd.touches[0].y;
+      applyDomTransform(sd.transform.x + dx, sd.transform.y + dy, sd.transform.zoom);
+    } else if (e.touches.length === 2 && sd.touches.length >= 2) {
       const startDist = Math.hypot(
-        startData.touches[1].x - startData.touches[0].x,
-        startData.touches[1].y - startData.touches[0].y,
+        sd.touches[1].x - sd.touches[0].x,
+        sd.touches[1].y - sd.touches[0].y,
       );
       const curDist = Math.hypot(
         e.touches[1].clientX - e.touches[0].clientX,
@@ -489,30 +520,30 @@ export function Canvas() {
       );
 
       if (startDist > 0) {
-        const scale = curDist / startDist;
-        const newZoom = Math.max(0.1, Math.min(5, startData.transform.zoom * scale));
-
-        // Zoom around the midpoint of the two fingers
+        const newZoom = Math.max(0.1, Math.min(5, sd.transform.zoom * (curDist / startDist)));
         const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
         const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-        const startMidX = (startData.touches[0].x + startData.touches[1].x) / 2;
-        const startMidY = (startData.touches[0].y + startData.touches[1].y) / 2;
-
-        const panDx = midX - startMidX;
-        const panDy = midY - startMidY;
-
-        const zoomRatio = newZoom / startData.transform.zoom;
-        const newX = midX - (startMidX - startData.transform.x) * zoomRatio + panDx - (midX - startMidX);
-        const newY = midY - (startMidY - startData.transform.y) * zoomRatio + panDy - (midY - startMidY);
-
-        setViewTransform({ x: newX, y: newY, zoom: newZoom });
+        const startMidX = (sd.touches[0].x + sd.touches[1].x) / 2;
+        const startMidY = (sd.touches[0].y + sd.touches[1].y) / 2;
+        const ratio = newZoom / sd.transform.zoom;
+        applyDomTransform(
+          midX - (startMidX - sd.transform.x) * ratio,
+          midY - (startMidY - sd.transform.y) * ratio,
+          newZoom,
+        );
       }
     }
-  }, [setViewTransform]);
+  }, [applyDomTransform]);
 
   const handleTouchEnd = useCallback(() => {
+    // Sync final DOM transform to React state
+    if (touchTransformRef.current) {
+      const { x, y, zoom } = touchTransformRef.current;
+      setViewTransform({ x, y, zoom });
+      touchTransformRef.current = null;
+    }
     touchStartRef.current = null;
-  }, []);
+  }, [setViewTransform]);
 
   // Get source position for arc drawing ghost
   const arcSourcePos = arcDrawing ? (
@@ -534,7 +565,6 @@ export function Canvas() {
       onMouseMove={(e) => { handleMouseMove(e); handleMouseMoveForTooltip(e); }}
       onMouseUp={handleMouseUp}
       onMouseLeave={(e) => { handleMouseUp(); clearTooltip(); }}
-      onWheel={handleWheel}
       onDoubleClick={handleDoubleClick}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
@@ -544,7 +574,7 @@ export function Canvas() {
     >
       <SvgDefs />
 
-      <g transform={`translate(${viewTransform.x}, ${viewTransform.y}) scale(${viewTransform.zoom})`}>
+      <g ref={groupRef} transform={`translate(${viewTransform.x}, ${viewTransform.y}) scale(${viewTransform.zoom})`}>
         {/* Grid - covers visible viewport */}
         {showGrid && (() => {
           const vx = -viewTransform.x / viewTransform.zoom;

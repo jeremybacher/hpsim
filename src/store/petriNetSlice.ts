@@ -44,7 +44,6 @@ export interface PetriNetSlice {
 
   // Net
   setNet: (net: PetriNet) => void;
-  clearNet: () => void;
   getMarking: () => Marking;
   setMarking: (marking: Marking) => void;
 }
@@ -291,12 +290,6 @@ export const createPetriNetSlice: StateCreator<StoreState, [['zustand/immer', ne
   setNet: (net) => {
     set((state) => {
       state.net = net;
-    });
-  },
-
-  clearNet: () => {
-    set((state) => {
-      state.net = createEmptyNet();
     });
   },
 

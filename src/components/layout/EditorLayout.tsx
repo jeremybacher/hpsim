@@ -18,9 +18,10 @@ import { ShortcutsDialog } from '@/components/dialogs/ShortcutsDialog';
 import { HelpDialog } from '@/components/dialogs/HelpDialog';
 import { AnalysisPanel } from '@/components/analysis/AnalysisPanel';
 import { GuidedTour } from '@/components/tour/GuidedTour';
+import { useLocalStoragePersistence } from '@/hooks/useLocalStoragePersistence';
 import { Toaster } from '@/components/ui/sonner';
 import { Button } from '@/components/ui/button';
-import { FolderOpen, Play, Square, HelpCircle, Compass, Sun, Moon } from 'lucide-react';
+import { FolderOpen, Play, Square, HelpCircle, Compass, Sun, Moon, Github, Star } from 'lucide-react';
 import {
   deserializeAuto,
   readFileAsArrayBuffer,
@@ -48,11 +49,23 @@ export function EditorLayout() {
   const pushSnapshot = useStore((s) => s.pushSnapshot);
   const clearHistory = useStore((s) => s.clearHistory);
 
+  useLocalStoragePersistence();
+
   const isEmpty = Object.keys(net.places).length === 0
     && Object.keys(net.transitions).length === 0
     && Object.keys(net.annotations).length === 0;
 
+  const [starCount, setStarCount] = useState(0);
+
   useEffect(() => setMounted(true), []);
+
+  // Fetch GitHub star count
+  useEffect(() => {
+    fetch('https://api.github.com/repos/jeremybacher/hpsim')
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => { if (data?.stargazers_count != null) setStarCount(data.stargazers_count); })
+      .catch(() => {});
+  }, []);
 
   // Auto-show tour on first visit (desktop only)
   useEffect(() => {
@@ -73,7 +86,7 @@ export function EditorLayout() {
     const file = e.target.files?.[0];
     if (!file) return;
     const ext = file.name.split('.').pop()?.toLowerCase();
-    if (ext !== 'hps' && ext !== 'json') {
+    if (ext !== 'hps') {
       toast.error(t('toast.unsupportedFile', { ext: ext || '' }));
       if (mobileFileRef.current) mobileFileRef.current.value = '';
       return;
@@ -145,6 +158,20 @@ export function EditorLayout() {
               ES
             </button>
           </div>
+
+          <a
+            href="https://github.com/jeremybacher/hpsim"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 h-7 px-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+            title="GitHub"
+          >
+            <Github className="w-3.5 h-3.5" />
+            <span className="flex items-center gap-0.5 text-xs font-medium">
+              <Star className="w-3 h-3" />
+              {starCount}
+            </span>
+          </a>
         </div>
       </div>
 
@@ -155,40 +182,10 @@ export function EditorLayout() {
         <input
           ref={mobileFileRef}
           type="file"
-          accept=".hps,.json,application/json,application/octet-stream,*/*"
+          accept=".hps,application/octet-stream"
           className="hidden"
           onChange={handleMobileOpen}
         />
-
-        {/* Theme + Language (mobile) */}
-        <button
-          type="button"
-          className="h-8 w-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-          onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-        >
-          {mounted && resolvedTheme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-        </button>
-
-        <div className="flex items-center h-7 rounded-md border bg-muted/50 p-0.5">
-          <button
-            type="button"
-            className={`px-1.5 h-6 rounded-sm text-[10px] font-medium transition-colors ${
-              locale === 'en' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'
-            }`}
-            onClick={() => setLocale('en' as Locale)}
-          >
-            EN
-          </button>
-          <button
-            type="button"
-            className={`px-1.5 h-6 rounded-sm text-[10px] font-medium transition-colors ${
-              locale === 'es' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'
-            }`}
-            onClick={() => setLocale('es' as Locale)}
-          >
-            ES
-          </button>
-        </div>
 
         <Button
           variant="outline"
@@ -252,6 +249,51 @@ export function EditorLayout() {
       {/* Bottom simulation controls */}
       <div data-tour="simulation">
         <SimulationControls />
+      </div>
+
+      {/* Mobile footer */}
+      <div className="flex md:hidden items-center justify-between px-3 py-1.5 border-t bg-card">
+        <div className="flex items-center h-7 rounded-md border bg-muted/50 p-0.5">
+          <button
+            type="button"
+            className={`px-1.5 h-6 rounded-sm text-[10px] font-medium transition-colors ${
+              locale === 'en' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'
+            }`}
+            onClick={() => setLocale('en' as Locale)}
+          >
+            EN
+          </button>
+          <button
+            type="button"
+            className={`px-1.5 h-6 rounded-sm text-[10px] font-medium transition-colors ${
+              locale === 'es' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'
+            }`}
+            onClick={() => setLocale('es' as Locale)}
+          >
+            ES
+          </button>
+        </div>
+
+        <button
+          type="button"
+          className="h-8 w-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+        >
+          {mounted && resolvedTheme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+        </button>
+
+        <a
+          href="https://github.com/jeremybacher/hpsim"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1 h-8 px-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+        >
+          <Github className="w-4 h-4" />
+          <span className="flex items-center gap-0.5 text-xs font-medium">
+            <Star className="w-3 h-3" />
+            {starCount}
+          </span>
+        </a>
       </div>
 
       {/* Dialogs */}

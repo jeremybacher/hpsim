@@ -9,13 +9,11 @@ const en = {
 
   // Menu - File
   'menu.file': 'File',
-  'menu.file.new': 'New',
   'menu.file.open': 'Open...',
-  'menu.file.saveAs': 'Save As...',
-  'menu.file.saveJson': 'HPSim JSON (.hps)',
-  'menu.file.saveBinary': 'HPSim Binary (.hps)',
+  'menu.file.saveHps': 'Save HPSim (.hps)',
   'menu.file.exportImage': 'Export Image...',
-  'menu.file.sampleNets': 'Sample Nets...',
+  'menu.file.emptyCanvas': 'Nothing to save — add elements first',
+  'menu.file.sampleNets': 'Sample Nets',
 
   // Menu - Edit
   'menu.edit': 'Edit',
@@ -134,21 +132,13 @@ const en = {
   'mobile.simulate': 'Simulate',
   'mobile.stop': 'Stop',
 
-  // Confirm dialogs
-  'confirm.newNet.title': 'Create new net?',
-  'confirm.newNet.desc': 'This will clear the current net. Unsaved changes will be lost.',
-  'confirm.cancel': 'Cancel',
-  'confirm.createNew': 'Create New',
-
   // Toasts
-  'toast.newNet': 'New net created',
-  'toast.saved': 'Saved as {filename} (JSON)',
   'toast.exported': 'Exported as {filename} (HPSim binary)',
   'toast.loaded': 'Loaded "{name}"',
   'toast.loadedFrom': 'Loaded "{name}" from {file}',
   'toast.loadFailed': 'Failed to load',
   'toast.exportFailed': 'Export failed',
-  'toast.unsupportedFile': 'Unsupported file type: .{ext}. Only .hps and .json files are supported.',
+  'toast.unsupportedFile': 'Unsupported file type: .{ext}. Only .hps files are supported.',
   'toast.sampleLoaded': 'Loaded sample: {name}',
   'toast.sampleFailed': 'Failed to load sample',
 
@@ -204,7 +194,7 @@ const en = {
   'help.sim.analysis': '<b>Analysis:</b> View reachability and other properties during simulation.',
   'help.sim.deadlock': '<b>Deadlock:</b> A deadlock occurs when no transition in the net can fire — every transition has at least one input place without enough tokens. The simulation stops because there is no possible next step. This is shown as a red "Deadlocked" badge in the simulation controls.',
   'help.fileFormat': 'File Format',
-  'help.fileFormatDesc': 'HPSim supports both JSON and binary <code>.hps</code> files. Use <b>File > Save As</b> to choose the format. The binary format is compatible with the desktop HOldPetriSim application.',
+  'help.fileFormatDesc': 'HPSim uses the binary <code>.hps</code> format, fully compatible with the desktop HOldPetriSim application.',
   'help.arcTypes': 'Arc Types',
   'help.arcType.normal': '<b>Normal:</b> Consumes tokens from the source place and produces tokens in the target place.',
   'help.arcType.inhibitor': '<b>Inhibitor:</b> The transition is enabled only when the connected place has <em>no</em> tokens.',
@@ -280,13 +270,11 @@ const es: Record<keyof typeof en, string> = {
 
   // Menu - File
   'menu.file': 'Archivo',
-  'menu.file.new': 'Nuevo',
   'menu.file.open': 'Abrir...',
-  'menu.file.saveAs': 'Guardar como...',
-  'menu.file.saveJson': 'HPSim JSON (.hps)',
-  'menu.file.saveBinary': 'HPSim Binario (.hps)',
-  'menu.file.exportImage': 'Exportar Imagen...',
-  'menu.file.sampleNets': 'Redes de Ejemplo...',
+  'menu.file.saveHps': 'Guardar HPSim (.hps)',
+  'menu.file.exportImage': 'Exportar Imagen',
+  'menu.file.emptyCanvas': 'Nada que guardar — agrega elementos primero',
+  'menu.file.sampleNets': 'Diagramas de Ejemplo',
 
   // Menu - Edit
   'menu.edit': 'Editar',
@@ -405,21 +393,13 @@ const es: Record<keyof typeof en, string> = {
   'mobile.simulate': 'Simular',
   'mobile.stop': 'Detener',
 
-  // Confirm dialogs
-  'confirm.newNet.title': '\u00bfCrear nueva red?',
-  'confirm.newNet.desc': 'Esto borrar\u00e1 la red actual. Los cambios no guardados se perder\u00e1n.',
-  'confirm.cancel': 'Cancelar',
-  'confirm.createNew': 'Crear Nueva',
-
   // Toasts
-  'toast.newNet': 'Nueva red creada',
-  'toast.saved': 'Guardado como {filename} (JSON)',
   'toast.exported': 'Exportado como {filename} (HPSim binario)',
   'toast.loaded': 'Cargado "{name}"',
   'toast.loadedFrom': 'Cargado "{name}" desde {file}',
   'toast.loadFailed': 'Error al cargar',
   'toast.exportFailed': 'Error al exportar',
-  'toast.unsupportedFile': 'Tipo de archivo no soportado: .{ext}. Solo se admiten archivos .hps y .json.',
+  'toast.unsupportedFile': 'Tipo de archivo no soportado: .{ext}. Solo se admiten archivos .hps.',
   'toast.sampleLoaded': 'Ejemplo cargado: {name}',
   'toast.sampleFailed': 'Error al cargar ejemplo',
 
@@ -475,14 +455,14 @@ const es: Record<keyof typeof en, string> = {
   'help.sim.analysis': '<b>An\u00e1lisis:</b> Ver alcanzabilidad y otras propiedades durante la simulaci\u00f3n.',
   'help.sim.deadlock': '<b>Bloqueo (Deadlock):</b> Un bloqueo ocurre cuando ninguna transici\u00f3n de la red puede dispararse \u2014 cada transici\u00f3n tiene al menos un lugar de entrada sin suficientes tokens. La simulaci\u00f3n se detiene porque no hay un paso siguiente posible. Esto se muestra como una insignia roja "Bloqueado" en los controles de simulaci\u00f3n.',
   'help.fileFormat': 'Formato de Archivo',
-  'help.fileFormatDesc': 'HPSim soporta archivos <code>.hps</code> tanto en JSON como en binario. Usa <b>Archivo > Guardar como</b> para elegir el formato. El formato binario es compatible con la aplicaci\u00f3n de escritorio HOldPetriSim.',
+  'help.fileFormatDesc': 'HPSim usa el formato binario <code>.hps</code>, totalmente compatible con la aplicaci\u00f3n de escritorio HOldPetriSim.',
   'help.arcTypes': 'Tipos de Arco',
   'help.arcType.normal': '<b>Normal:</b> Consume tokens del lugar de origen y produce tokens en el lugar de destino.',
   'help.arcType.inhibitor': '<b>Inhibidor:</b> La transici\u00f3n se habilita solo cuando el lugar conectado <em>no</em> tiene tokens.',
   'help.arcType.read': '<b>Lectura:</b> Verifica tokens sin consumirlos.',
 
   // Sample nets dialog
-  'samples.title': 'Redes de Petri de Ejemplo',
+  'samples.title': 'Ejemplos de Redes de Petri',
   'samples.simpleSequence': 'Secuencia Simple',
   'samples.simpleSequenceDesc': 'Un flujo secuencial b\u00e1sico: P1 -> T1 -> P2 -> T2 -> P3',
   'samples.producerConsumer': 'Productor-Consumidor',
@@ -530,7 +510,7 @@ const es: Record<keyof typeof en, string> = {
   'tour.menu.title': 'Barra de Men\u00fa',
   'tour.menu.desc': 'Operaciones de archivo, herramientas de edici\u00f3n, ajustes de vista, simulaci\u00f3n y ayuda son accesibles desde aqu\u00ed.',
   'tour.done.title': '\u00a1Est\u00e1s listo!',
-  'tour.done.desc': 'Comienza cargando una red de ejemplo desde Archivo > Redes de Ejemplo, o crea la tuya desde cero. \u00a1Divi\u00e9rtete!',
+  'tour.done.desc': 'Comienza cargando una red de ejemplo desde Archivo > Ejemplos, o crea la tuya desde cero. \u00a1Divi\u00e9rtete!',
   'tour.mobile.canvas.desc': 'Este es tu espacio de trabajo. Toca para interactuar con los elementos. Usa un dedo para desplazar y pellizca para hacer zoom.',
   'tour.mobile.done.desc': 'Toca Abrir para cargar un archivo .hps y comenzar a explorar. Para la experiencia completa de edici\u00f3n con todas las herramientas, usa un navegador de escritorio.',
   'tour.next': 'Siguiente',

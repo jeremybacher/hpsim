@@ -675,23 +675,3 @@ export function parseHpsFile(buffer: ArrayBuffer): PetriNet {
   };
 }
 
-/** Detect if an ArrayBuffer contains a binary MFC .hps file (not JSON) */
-export function isBinaryHps(buffer: ArrayBuffer): boolean {
-  if (buffer.byteLength === 0) return false;
-
-  const bytes = new Uint8Array(buffer, 0, Math.min(buffer.byteLength, 20));
-
-  // Skip UTF-8 BOM if present (0xEF 0xBB 0xBF)
-  let start = 0;
-  if (bytes.length >= 3 && bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) {
-    start = 3;
-  }
-
-  for (let i = start; i < bytes.length; i++) {
-    const byte = bytes[i];
-    if (byte === 0x20 || byte === 0x0A || byte === 0x0D || byte === 0x09) continue;
-    if (byte === 0x7B) return false; // '{' = JSON
-    return true; // Binary
-  }
-  return true;
-}

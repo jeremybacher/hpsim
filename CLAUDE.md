@@ -35,9 +35,9 @@ Read `.claude/CONTEXT.md` first for full project architecture, tech stack, and d
 
 ### File Format
 
-- `.hps` files can be JSON (our format) or binary (HOldPetriSim MFC format).
-- `deserializeAuto()` handles both. Always use it for opening files.
-- For saving: `serializeJSON()` for our format, `serializeBinaryHps()` for desktop compat.
+- `.hps` files use the binary HOldPetriSim MFC CArchive format.
+- `deserializeAuto()` opens files. `serializeBinaryHps()` saves them.
+- Canvas state is auto-saved to localStorage and restored on load.
 
 ### Types
 

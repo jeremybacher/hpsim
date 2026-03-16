@@ -9,12 +9,17 @@ A browser-based Petri Net editor and simulator inspired by the desktop app [HPSi
 - **Fast Simulation** - Auto-run with adjustable speed (1-1000 firings/sec), deadlock detection
 - **Properties Panel** - Edit labels, tokens, capacity, delay, priority, arc weight/type
 - **Arc Types** - Normal, inhibitor, and read arcs with proper semantics
+- **Copy/Paste** - Cut, copy, and paste elements with full arc preservation (Ctrl+X/C/V)
 - **Undo/Redo** - Full snapshot-based history (Ctrl+Z / Ctrl+Y)
-- **Save/Load** - JSON format and binary HOldPetriSim .hps format (import & export)
+- **Save/Load** - Binary .hps format compatible with the original [HOldPetriSim](https://github.com/Uzuul23/HOldPetriSim) desktop app
 - **Sample Nets** - 5 prebuilt examples (Simple Sequence, Producer-Consumer, Mutual Exclusion, Dining Philosophers, Reader-Writer)
 - **Performance Analysis** - Place/transition statistics, reachability markings, CSV export
 - **Image Export** - PNG (configurable resolution) and SVG
 - **Dark Mode** - Toggle via View menu
+- **Internationalization** - English and Spanish UI, auto-detected from browser locale
+- **Guided Tour** - Interactive walkthrough for new users (Help menu)
+- **Responsive Layout** - Adapts to different screen sizes with collapsible panels
+- **Auto-Save** - Canvas state persisted to localStorage and restored on load
 - **Keyboard Shortcuts** - Tool selection, undo/redo, delete, select all, canvas navigation
 
 ## Getting Started
@@ -64,12 +69,7 @@ npm start
 
 ### File Compatibility
 
-HPSim supports two .hps file formats:
-
-- **HPSim JSON** - Our native format, human-readable
-- **HPSim Binary** - Compatible with the original [HOldPetriSim](https://github.com/Uzuul23/HOldPetriSim) desktop application (MFC CArchive format)
-
-Open either format via File > Open. Save via File > Save As with your preferred format.
+HPSim uses the binary `.hps` format (MFC CArchive) from the original [HOldPetriSim](https://github.com/Uzuul23/HOldPetriSim) desktop application. Files can be freely exchanged between both apps via File > Open and File > Save.
 
 ### Keyboard Shortcuts
 
@@ -83,6 +83,9 @@ Open either format via File > Open. Save via File > Save As with your preferred 
 | X / 6 | Delete tool |
 | Ctrl+Z | Undo |
 | Ctrl+Y | Redo |
+| Ctrl+X | Cut |
+| Ctrl+C | Copy |
+| Ctrl+V | Paste |
 | Ctrl+A | Select all |
 | Delete | Remove selected |
 | Escape | Cancel / Deselect |

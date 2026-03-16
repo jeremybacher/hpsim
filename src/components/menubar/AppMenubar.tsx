@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { useStore } from '@/store/useStore';
 import { useTheme } from 'next-themes';
 import { useTranslation } from '@/lib/i18n';
@@ -13,25 +13,11 @@ import {
   MenubarShortcut,
   MenubarTrigger,
   MenubarCheckboxItem,
-  MenubarSub,
-  MenubarSubContent,
-  MenubarSubTrigger,
 } from '@/components/ui/menubar';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import {
-  serializeJSON,
   deserializeAuto,
   readFileAsArrayBuffer,
-  downloadFile,
   serializeBinaryHps,
   downloadBinaryFile,
 } from '@/lib/serialization';
@@ -47,9 +33,8 @@ interface AppMenubarProps {
 }
 
 export function AppMenubar({ onOpenSamples, onOpenExport, onOpenAnalysis, onOpenShortcuts, onOpenHelp, onOpenTour }: AppMenubarProps) {
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [confirmNewOpen, setConfirmNewOpen] = useState(false);
   const { theme, setTheme } = useTheme();
 
   const net = useStore((s) => s.net);
@@ -57,7 +42,6 @@ export function AppMenubar({ onOpenSamples, onOpenExport, onOpenAnalysis, onOpen
   const snapToGrid = useStore((s) => s.snapToGrid);
   const mode = useStore((s) => s.mode);
   const setNet = useStore((s) => s.setNet);
-  const clearNet = useStore((s) => s.clearNet);
   const setShowGrid = useStore((s) => s.setShowGrid);
   const setSnapToGrid = useStore((s) => s.setSnapToGrid);
   const resetView = useStore((s) => s.resetView);
@@ -75,35 +59,19 @@ export function AppMenubar({ onOpenSamples, onOpenExport, onOpenAnalysis, onOpen
   const setMode = useStore((s) => s.setMode);
   const clearHistory = useStore((s) => s.clearHistory);
 
-  const hasContent = Object.keys(net.places).length > 0 || Object.keys(net.transitions).length > 0;
-
-  const handleNew = () => {
-    if (hasContent) {
-      setConfirmNewOpen(true);
-    } else {
-      doNew();
-    }
-  };
-
-  const doNew = () => {
-    clearNet();
-    clearHistory();
-    toast.success(t('toast.newNet'));
-  };
-
-  const handleSaveJSON = () => {
-    const json = serializeJSON(net);
-    const filename = (net.name || 'untitled').replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.hps';
-    downloadFile(json, filename);
-    toast.success(t('toast.saved', { filename }));
-  };
+  const isEmpty = Object.keys(net.places).length === 0
+    && Object.keys(net.transitions).length === 0
+    && Object.keys(net.annotations).length === 0;
 
   const handleSaveBinaryHps = () => {
     try {
       const buffer = serializeBinaryHps(net);
       const filename = (net.name || 'untitled').replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.hps';
-      downloadBinaryFile(buffer, filename);
-      toast.success(t('toast.exported', { filename }));
+      // Use setTimeout to escape menu dismiss, preserving the download trigger
+      setTimeout(() => {
+        downloadBinaryFile(buffer, filename);
+        toast.success(t('toast.exported', { filename }));
+      }, 0);
     } catch (err) {
       toast.error(t('toast.exportFailed') + ': ' + (err instanceof Error ? err.message : 'Unknown error'));
     }
@@ -113,7 +81,7 @@ export function AppMenubar({ onOpenSamples, onOpenExport, onOpenAnalysis, onOpen
     const file = e.target.files?.[0];
     if (!file) return;
     const ext = file.name.split('.').pop()?.toLowerCase();
-    if (ext !== 'hps' && ext !== 'json') {
+    if (ext !== 'hps') {
       toast.error(t('toast.unsupportedFile', { ext: ext || '' }));
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;
@@ -144,28 +112,10 @@ export function AppMenubar({ onOpenSamples, onOpenExport, onOpenAnalysis, onOpen
       <input
         ref={fileInputRef}
         type="file"
-        accept=".hps,.json,application/json,application/octet-stream,*/*"
+        accept=".hps,application/octet-stream"
         className="hidden"
         onChange={handleOpen}
       />
-
-      {/* Confirm New dialog */}
-      <AlertDialog open={confirmNewOpen} onOpenChange={setConfirmNewOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('confirm.newNet.title')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('confirm.newNet.desc')}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('confirm.cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={() => { doNew(); setConfirmNewOpen(false); }}>
-              {t('confirm.createNew')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       <Menubar className="border-none rounded-none px-2 h-9 shadow-none">
         <div className="flex items-center gap-1.5 mr-2 pr-2 border-r">
@@ -174,28 +124,33 @@ export function AppMenubar({ onOpenSamples, onOpenExport, onOpenAnalysis, onOpen
         </div>
         <MenubarMenu>
           <MenubarTrigger className="text-sm py-1">{t('menu.file')}</MenubarTrigger>
-          <MenubarContent>
-            <MenubarItem onClick={handleNew}>
-              {t('menu.file.new')} <MenubarShortcut>Ctrl+N</MenubarShortcut>
-            </MenubarItem>
+          <MenubarContent className={locale === 'es' ? 'w-42' : undefined}>
             <MenubarItem onClick={() => fileInputRef.current?.click()}>
               {t('menu.file.open')} <MenubarShortcut>Ctrl+O</MenubarShortcut>
             </MenubarItem>
 
-            <MenubarSub>
-              <MenubarSubTrigger>{t('menu.file.saveAs')}</MenubarSubTrigger>
-              <MenubarSubContent>
-                <MenubarItem onClick={handleSaveJSON}>
-                  {t('menu.file.saveJson')}
-                </MenubarItem>
-                <MenubarItem onClick={handleSaveBinaryHps}>
-                  {t('menu.file.saveBinary')}
-                </MenubarItem>
-              </MenubarSubContent>
-            </MenubarSub>
+            {isEmpty ? (
+              <Tooltip>
+                <TooltipTrigger className="w-full whitespace-nowrap">
+                  <MenubarItem disabled>{t('menu.file.saveHps')}</MenubarItem>
+                </TooltipTrigger>
+                <TooltipContent side="right">{t('menu.file.emptyCanvas')}</TooltipContent>
+              </Tooltip>
+            ) : (
+              <MenubarItem onClick={handleSaveBinaryHps}>{t('menu.file.saveHps')}</MenubarItem>
+            )}
 
             <MenubarSeparator />
-            <MenubarItem onClick={onOpenExport}>{t('menu.file.exportImage')}</MenubarItem>
+            {isEmpty ? (
+              <Tooltip>
+                <TooltipTrigger className="w-full whitespace-nowrap">
+                  <MenubarItem disabled>{t('menu.file.exportImage')}</MenubarItem>
+                </TooltipTrigger>
+                <TooltipContent side="right">{t('menu.file.emptyCanvas')}</TooltipContent>
+              </Tooltip>
+            ) : (
+              <MenubarItem onClick={onOpenExport}>{t('menu.file.exportImage')}</MenubarItem>
+            )}
             <MenubarSeparator />
             <MenubarItem onClick={onOpenSamples}>{t('menu.file.sampleNets')}</MenubarItem>
           </MenubarContent>
@@ -203,7 +158,7 @@ export function AppMenubar({ onOpenSamples, onOpenExport, onOpenAnalysis, onOpen
 
         <MenubarMenu>
           <MenubarTrigger className="text-sm py-1">{t('menu.edit')}</MenubarTrigger>
-          <MenubarContent>
+          <MenubarContent className={locale === 'es' ? 'w-46' : undefined}>
             <MenubarItem onClick={undo} disabled={mode !== 'edit'}>
               {t('menu.edit.undo')} <MenubarShortcut>Ctrl+Z</MenubarShortcut>
             </MenubarItem>
@@ -232,7 +187,7 @@ export function AppMenubar({ onOpenSamples, onOpenExport, onOpenAnalysis, onOpen
 
         <MenubarMenu>
           <MenubarTrigger className="text-sm py-1">{t('menu.view')}</MenubarTrigger>
-          <MenubarContent>
+          <MenubarContent className={locale === 'es' ? 'w-46' : undefined}>
             <MenubarCheckboxItem checked={showGrid} onCheckedChange={setShowGrid}>
               {t('menu.view.showGrid')}
             </MenubarCheckboxItem>
@@ -253,7 +208,7 @@ export function AppMenubar({ onOpenSamples, onOpenExport, onOpenAnalysis, onOpen
 
         <MenubarMenu>
           <MenubarTrigger className="text-sm py-1">{t('menu.simulation')}</MenubarTrigger>
-          <MenubarContent>
+          <MenubarContent className={locale === 'es' ? 'w-46' : undefined}>
             <MenubarItem
               onClick={() => setMode(mode === 'edit' ? 'token-game' : 'edit')}
             >
@@ -274,7 +229,7 @@ export function AppMenubar({ onOpenSamples, onOpenExport, onOpenAnalysis, onOpen
 
         <MenubarMenu>
           <MenubarTrigger className="text-sm py-1">{t('menu.help')}</MenubarTrigger>
-          <MenubarContent>
+          <MenubarContent className={locale === 'en' ? 'w-38' : undefined}>
             <MenubarItem onClick={onOpenHelp}>
               {t('menu.help.howItWorks')}
             </MenubarItem>
